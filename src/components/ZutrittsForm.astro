@@ -1,0 +1,66 @@
+---
+const inputClass = 'w-full bg-white/5 border border-mc-border text-mc-text px-4 py-3 focus:border-mc-accent/30 focus:outline-none text-sm';
+const labelClass = 'block text-xs tracking-[1px] uppercase text-white/40 mb-2';
+const checkboxLabelClass = 'flex items-start gap-3 cursor-pointer text-sm text-white/40 hover:text-white/60 transition-colors';
+const radioLabelClass = 'flex items-center gap-3 cursor-pointer text-sm text-white/50 hover:text-white/70 transition-colors';
+---
+
+<form
+  name="zutrittsberechtigung"
+  method="POST"
+  data-netlify="true"
+  netlify-honeypot="bot-field"
+  class="max-w-2xl"
+>
+  <input type="hidden" name="form-name" value="zutrittsberechtigung" />
+  <p class="hidden"><input name="bot-field" /></p>
+
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
+    <div>
+      <label for="zf-name" class={labelClass}>Name</label>
+      <input type="text" id="zf-name" name="name" required class={inputClass} />
+    </div>
+    <div>
+      <label for="zf-vorname" class={labelClass}>Vorname</label>
+      <input type="text" id="zf-vorname" name="vorname" required class={inputClass} />
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <label for="zf-email" class={labelClass}>E-Mail</label>
+    <input type="email" id="zf-email" name="email" required class={inputClass} />
+  </div>
+
+  <div class="mb-8">
+    <p class={`${labelClass} mb-4`}>Zutrittsmittel</p>
+    <div class="space-y-3">
+      <label class={radioLabelClass}>
+        <input type="radio" name="zutrittsmittel" value="schluesselanhaenger" required class="accent-[#c8ff00]" />
+        <span>Schlüsselanhänger</span>
+      </label>
+      <label class={radioLabelClass}>
+        <input type="radio" name="zutrittsmittel" value="schluesselkarte" class="accent-[#c8ff00]" />
+        <span>Schlüsselkarte</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="mb-8">
+    <label for="zf-anmerkungen" class={labelClass}>Anmerkungen</label>
+    <textarea id="zf-anmerkungen" name="anmerkungen" rows="3" class={inputClass}></textarea>
+  </div>
+
+  <div class="mb-8">
+    <label class={checkboxLabelClass}>
+      <input type="checkbox" name="datenschutz" required class="mt-0.5 accent-[#c8ff00]" />
+      <span>Ich habe die <a href="/datenschutz" class="text-mc-accent/60 hover:text-mc-accent underline-offset-2 hover:underline">Datenschutzerklärung</a> gelesen und stimme der Verarbeitung meiner Daten zu.</span>
+    </label>
+  </div>
+
+  <button
+    type="submit"
+    class="cta-sweep inline-block px-9 py-3.5 border border-mc-accent/30 text-mc-accent/80 text-xs tracking-[3px] uppercase transition-colors hover:bg-mc-accent/10 cursor-pointer"
+  >
+    Absenden
+  </button>
+</form>
