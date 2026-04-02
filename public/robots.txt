@@ -1,0 +1,3 @@
+User-agent: *
+Allow: /
+Sitemap: https://www.tck-boetzingen.de/sitemap-index.xml

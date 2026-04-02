@@ -1,0 +1,72 @@
+---
+interface Props {
+  title: string;
+  description: string;
+  lang?: string;
+  canonicalUrl?: string;
+  ogImage?: string;
+}
+
+const {
+  title,
+  description,
+  lang = 'de',
+  canonicalUrl,
+  ogImage = '/og-default.jpg',
+} = Astro.props;
+
+const siteUrl = 'https://www.tck-boetzingen.de';
+const languages = ['de', 'en', 'fr', 'ru', 'uk', 'es'];
+const currentPath = Astro.url.pathname;
+
+function hreflangUrl(l: string): string {
+  if (l === 'de') return `${siteUrl}/`;
+  return `${siteUrl}/${l}/`;
+}
+
+const isHomePage =
+  currentPath === '/' ||
+  languages.some((l) => currentPath === `/${l}` || currentPath === `/${l}/`);
+---
+
+<title>{title}</title>
+<meta name="description" content={description} />
+
+{canonicalUrl && <link rel="canonical" href={canonicalUrl} />}
+
+<!-- Open Graph -->
+<meta property="og:title" content={title} />
+<meta property="og:description" content={description} />
+<meta property="og:type" content="website" />
+<meta property="og:image" content={`${siteUrl}${ogImage}`} />
+<meta property="og:locale" content={lang} />
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={title} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={`${siteUrl}${ogImage}`} />
+
+<!-- Hreflang -->
+{languages.map((l) => (
+  <link rel="alternate" hreflang={l} href={hreflangUrl(l)} />
+))}
+<link rel="alternate" hreflang="x-default" href={`${siteUrl}/`} />
+
+<!-- LocalBusiness JSON-LD (home page only) -->
+{isHomePage && (
+  <script type="application/ld+json" set:html={JSON.stringify({
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "name": "TCK Bötzingen",
+    "address": {
+      "@type": "PostalAddress",
+      "streetAddress": "Waldstraße 5",
+      "addressLocality": "Bötzingen",
+      "postalCode": "79268",
+      "addressCountry": "DE"
+    },
+    "telephone": "07663-2440",
+    "url": siteUrl
+  })} />
+)}
