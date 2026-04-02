@@ -1,0 +1,22 @@
+---
+const { class: className = '', delay = 0 } = Astro.props;
+---
+<div class:list={["reveal", className]} data-delay={delay}>
+  <slot />
+</div>
+
+<script is:inline>
+if (!window.__revealInit) {
+  window.__revealInit = true;
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        const d = Number(entry.target.dataset.delay) || 0;
+        setTimeout(() => entry.target.classList.add('visible'), d);
+        observer.unobserve(entry.target);
+      }
+    });
+  }, { threshold: 0.1 });
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+}
+</script>

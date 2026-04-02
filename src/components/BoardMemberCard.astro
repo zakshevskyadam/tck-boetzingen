@@ -1,0 +1,22 @@
+---
+interface Props {
+  name: string;
+  role: string;
+  email: string;
+  responsibilities: string;
+}
+
+const { name, role, email, responsibilities } = Astro.props;
+---
+
+<div class="card-hover relative overflow-hidden bg-white/[0.02] border border-mc-border p-8 transition-all duration-400">
+  <span class="text-[11px] tracking-[2px] uppercase text-mc-accent/70 block mb-2">{role}</span>
+  <h3 class="font-heading text-xl font-normal text-mc-text mb-3">{name}</h3>
+  <a
+    href={`mailto:${email}`}
+    class="text-sm text-mc-accent/60 hover:text-mc-accent transition-colors underline-offset-2 hover:underline block mb-4"
+  >
+    {email}
+  </a>
+  <p class="text-sm leading-relaxed text-white/35">{responsibilities}</p>
+</div>

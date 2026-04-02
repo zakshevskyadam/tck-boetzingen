@@ -1,0 +1,49 @@
+---
+interface Props {
+  lang: string;
+}
+
+const { lang } = Astro.props;
+
+const labels: Record<string, { time: string; member: string; guest: string; day: string; holiday: string }> = {
+  de: { time: 'Uhrzeit', member: 'Mitglied', guest: 'Gast', day: 'Tag', holiday: 'Sa/So/Feiertage' },
+  en: { time: 'Time', member: 'Member', guest: 'Guest', day: 'Day', holiday: 'Sat/Sun/Holidays' },
+  fr: { time: 'Horaire', member: 'Membre', guest: 'Invit\u00e9', day: 'Jour', holiday: 'Sam/Dim/Jours f\u00e9ri\u00e9s' },
+  ru: { time: '\u0412\u0440\u0435\u043c\u044f', member: '\u0427\u043b\u0435\u043d', guest: '\u0413\u043e\u0441\u0442\u044c', day: '\u0414\u0435\u043d\u044c', holiday: '\u0421\u0431/\u0412\u0441/\u041f\u0440\u0430\u0437\u0434\u043d\u0438\u043a\u0438' },
+  uk: { time: '\u0427\u0430\u0441', member: '\u0427\u043b\u0435\u043d', guest: '\u0413\u0456\u0441\u0442\u044c', day: '\u0414\u0435\u043d\u044c', holiday: '\u0421\u0431/\u041d\u0434/\u0421\u0432\u044f\u0442\u0430' },
+  es: { time: 'Horario', member: 'Socio', guest: 'Invitado', day: 'D\u00eda', holiday: 'S\u00e1b/Dom/Festivos' },
+};
+
+const l = labels[lang] || labels.de;
+
+const rows = [
+  { day: 'Mo\u2013Fr', time: '07:00\u201314:00', member: '14\u00a0\u20ac', guest: '17\u00a0\u20ac' },
+  { day: 'Mo\u2013Fr', time: '14:00\u201317:00', member: '17\u00a0\u20ac', guest: '20\u00a0\u20ac' },
+  { day: 'Mo\u2013Fr', time: '17:00\u201321:00', member: '21\u00a0\u20ac', guest: '24\u00a0\u20ac' },
+  { day: 'Mo\u2013Fr', time: '21:00\u201324:00', member: '14\u00a0\u20ac', guest: '17\u00a0\u20ac' },
+  { day: l.holiday, time: '07:00\u201324:00', member: '17\u00a0\u20ac', guest: '20\u00a0\u20ac' },
+];
+---
+
+<div class="overflow-x-auto">
+  <table class="w-full text-sm text-left border-collapse">
+    <thead>
+      <tr class="border-b border-mc-accent/20">
+        <th class="py-3 px-4 font-medium text-mc-accent tracking-wide uppercase text-xs">{l.day}</th>
+        <th class="py-3 px-4 font-medium text-mc-accent tracking-wide uppercase text-xs">{l.time}</th>
+        <th class="py-3 px-4 font-medium text-mc-accent tracking-wide uppercase text-xs">{l.member}</th>
+        <th class="py-3 px-4 font-medium text-mc-accent tracking-wide uppercase text-xs">{l.guest}</th>
+      </tr>
+    </thead>
+    <tbody>
+      {rows.map((row) => (
+        <tr class="border-b border-mc-border transition-colors hover:bg-white/[0.02]">
+          <td class="py-3 px-4 text-mc-text">{row.day}</td>
+          <td class="py-3 px-4 text-white/50">{row.time}</td>
+          <td class="py-3 px-4 text-mc-text font-medium">{row.member}</td>
+          <td class="py-3 px-4 text-white/40">{row.guest}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+</div>

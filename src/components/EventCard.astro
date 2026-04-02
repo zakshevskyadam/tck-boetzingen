@@ -1,0 +1,30 @@
+---
+interface Props {
+  title: string;
+  date: string;
+  description: string;
+}
+
+const { title, date, description } = Astro.props;
+
+// Format date for display
+const formatted = (() => {
+  try {
+    const d = new Date(date);
+    return d.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+  } catch {
+    return date;
+  }
+})();
+
+// Truncate description to ~120 chars
+const truncated = description.length > 120
+  ? description.slice(0, 120).replace(/\s+\S*$/, '') + '\u2026'
+  : description;
+---
+
+<div class="card-hover relative overflow-hidden bg-white/[0.02] border border-mc-border border-l-2 border-l-mc-accent/60 p-8 transition-all duration-400">
+  <time class="text-[11px] tracking-[2px] uppercase text-white/30 block mb-2">{formatted}</time>
+  <h3 class="font-heading text-xl font-normal text-mc-text mb-3">{title}</h3>
+  <p class="text-sm leading-relaxed text-white/40">{truncated}</p>
+</div>
