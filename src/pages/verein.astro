@@ -1,0 +1,179 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import yaml from 'js-yaml';
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionReveal from '../components/SectionReveal.astro';
+import BoardMemberCard from '../components/BoardMemberCard.astro';
+import TeamTable from '../components/TeamTable.astro';
+import { t, type Lang } from '../i18n/utils';
+
+const lang: Lang = 'de';
+
+// Load board members
+const boardDir = path.resolve('src/content/board-members');
+const boardSlugs = fs.readdirSync(boardDir).filter((f: string) => {
+  const stat = fs.statSync(path.join(boardDir, f));
+  return stat.isDirectory();
+});
+
+interface BoardMember {
+  name: string;
+  role: string;
+  email: string;
+  responsibilities: string;
+  sortOrder: number;
+}
+
+const boardMembers: BoardMember[] = boardSlugs
+  .map((slug: string) => {
+    const filePath = path.join(boardDir, slug, 'index.yaml');
+    if (!fs.existsSync(filePath)) return null;
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    return yaml.load(raw) as BoardMember;
+  })
+  .filter((m): m is BoardMember => m !== null)
+  .sort((a, b) => a.sortOrder - b.sortOrder);
+
+// Separate trainer from board
+const trainer = boardMembers.filter((m) => m.role === 'Clubtrainer');
+const board = boardMembers.filter((m) => m.role !== 'Clubtrainer');
+
+// Load teams
+const teamsDir = path.resolve('src/content/teams');
+const teamSlugs = fs.readdirSync(teamsDir).filter((f: string) => {
+  const stat = fs.statSync(path.join(teamsDir, f));
+  return stat.isDirectory();
+});
+
+interface TeamData {
+  name: string;
+  league: string;
+  season: string;
+  trainingDay: string;
+}
+
+const allTeams: TeamData[] = teamSlugs
+  .map((slug: string) => {
+    const filePath = path.join(teamsDir, slug, 'index.yaml');
+    if (!fs.existsSync(filePath)) return null;
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    return yaml.load(raw) as TeamData;
+  })
+  .filter((t): t is TeamData => t !== null);
+
+const summerTeams = allTeams
+  .filter((t) => t.season === 'summer')
+  .sort((a, b) => a.name.localeCompare(b.name, 'de'));
+
+const winterTeams = allTeams
+  .filter((t) => t.season === 'winter')
+  .sort((a, b) => a.name.localeCompare(b.name, 'de'));
+---
+
+<BaseLayout title="Verein – TCK Bötzingen" description="Der Tennisclub Kaiserstuhl Bötzingen: Geschichte, Vorstand, Trainer und Mannschaften.">
+
+  <!-- Geschichte -->
+  <section class="py-28 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('verein.history.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">{t('verein.history.title', lang)}</h2>
+        <div class="space-y-4 text-sm leading-relaxed text-white/40 max-w-2xl">
+          <p>
+            Der Tennisclub Kaiserstuhl Bötzingen e.V. wurde 1975 gegründet und ist damit einer der traditionsreichsten Tennisvereine am Kaiserstuhl. Was als kleine Gruppe tennisbegeisterter Bötzinger begann, hat sich über die Jahrzehnte zu einem der aktivsten Sportvereine der Gemeinde entwickelt.
+          </p>
+          <p>
+            In den Anfangsjahren wurden zunächst zwei Außenplätze errichtet. Mit wachsender Mitgliederzahl folgte der stetige Ausbau der Anlage auf heute sechs Außenplätze und eine moderne Zwei-Feld-Tennishalle. Der Bau des Clubhauses schuf einen Mittelpunkt für das Vereinsleben, der weit über den Sport hinausgeht.
+          </p>
+          <p>
+            Mit mittlerweile rund 185 Mitgliedern und 17 aktiven Mannschaften in allen Altersklassen – von der U9-Jugend bis zu den Senioren 60 – ist der TCK Bötzingen heute ein fester Bestandteil der regionalen Tennislandschaft. Besonderer Stolz des Vereins ist die starke Jugendarbeit in Zusammenarbeit mit der Tennisschule Tennis-Welt Süd.
+          </p>
+        </div>
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Vorstand -->
+  <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
+    <SectionReveal>
+      <div class="max-w-5xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('verein.board.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('verein.board.title', lang)}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {board.map((member) => (
+            <BoardMemberCard
+              name={member.name}
+              role={member.role}
+              email={member.email}
+              responsibilities={member.responsibilities}
+            />
+          ))}
+        </div>
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Trainerteam -->
+  <section id="trainer" class="py-28 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('verein.trainers.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">{t('verein.trainers.title', lang)}</h2>
+        <div class="space-y-6">
+          <div class="card-hover relative overflow-hidden bg-white/[0.02] border border-mc-border p-8 transition-all duration-400">
+            <span class="text-[11px] tracking-[2px] uppercase text-mc-accent/70 block mb-2">Tennis-Welt Süd</span>
+            <h3 class="font-heading text-xl font-normal text-mc-text mb-3">Luiz Weller</h3>
+            <p class="text-sm leading-relaxed text-white/40 mb-4">
+              Das Training beim TCK Bötzingen wird von der Tennisschule Tennis-Welt Süd unter der Leitung von Luiz Weller durchgeführt. Luiz bietet professionelles Training für alle Altersklassen und Spielstärken – vom Anfänger bis zum Leistungsspieler.
+            </p>
+            <p class="text-sm leading-relaxed text-white/40 mb-4">
+              Trainingsangebote: Jugendtraining, Erwachsenentraining, Mannschaftstraining, Einzelstunden und Camps.
+            </p>
+            <a
+              href="https://www.tennis-welt.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              class="text-sm text-mc-accent/60 hover:text-mc-accent transition-colors underline-offset-2 hover:underline"
+            >
+              www.tennis-welt.com &rarr;
+            </a>
+          </div>
+          {trainer.map((member) => (
+            <BoardMemberCard
+              name={member.name}
+              role={member.role}
+              email={member.email}
+              responsibilities={member.responsibilities}
+            />
+          ))}
+        </div>
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Mannschaften -->
+  <section id="mannschaften" class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
+    <SectionReveal>
+      <div class="max-w-5xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('verein.teams.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('verein.teams.title', lang)}</h2>
+
+        <div class="space-y-16">
+          <!-- Sommer -->
+          <div>
+            <h3 class="font-heading text-2xl font-light text-mc-text mb-6">Sommersaison</h3>
+            <TeamTable teams={summerTeams} season="Sommer 2026" />
+          </div>
+
+          <!-- Winter -->
+          <div>
+            <h3 class="font-heading text-2xl font-light text-mc-text mb-6">Wintersaison</h3>
+            <TeamTable teams={winterTeams} season="Winter 2025/26" />
+          </div>
+        </div>
+      </div>
+    </SectionReveal>
+  </section>
+
+</BaseLayout>
