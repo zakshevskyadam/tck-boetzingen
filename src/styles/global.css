@@ -1,0 +1,18 @@
+@import "tailwindcss";
+
+@theme {
+  --color-mc-bg: #0d1117;
+  --color-mc-bg-alt: #111827;
+  --color-mc-bg-end: #1c2a3a;
+  --color-mc-accent: #c8ff00;
+  --color-mc-accent-muted: oklch(0.85 0.2 110 / 0.6);
+  --color-mc-text: #f0f0f0;
+  --color-mc-text-secondary: oklch(1 0 0 / 0.65);
+  --color-mc-text-muted: oklch(1 0 0 / 0.5);
+  --color-mc-border: oklch(0.85 0.2 110 / 0.06);
+  --color-mc-court: oklch(0.85 0.2 110 / 0.12);
+  --color-mc-court-bright: oklch(0.85 0.2 110 / 0.18);
+
+  --font-heading: "Playfair Display", Georgia, serif;
+  --font-body: Inter, system-ui, sans-serif;
+}
