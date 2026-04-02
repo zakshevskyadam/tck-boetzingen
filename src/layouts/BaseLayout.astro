@@ -3,6 +3,8 @@ import '../styles/global.css';
 import '../styles/animations.css';
 import SkipToContent from '../components/SkipToContent.astro';
 import SEOHead from '../components/SEOHead.astro';
+import Nav from '../components/Nav.astro';
+import Footer from '../components/Footer.astro';
 
 interface Props {
   title: string;
@@ -23,8 +25,10 @@ const { title, description, lang = 'de' } = Astro.props;
   </head>
   <body class="bg-mc-bg text-mc-text-secondary font-body">
     <SkipToContent />
-    <main id="main-content">
+    <Nav lang={lang} />
+    <main id="main-content" class="pt-[72px]">
       <slot />
     </main>
+    <Footer lang={lang} />
   </body>
 </html>

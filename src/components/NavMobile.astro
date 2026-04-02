@@ -1,0 +1,48 @@
+---
+import { t, getLocalizedPath, type Lang } from '../i18n/utils';
+import LanguageSwitcher from './LanguageSwitcher.astro';
+
+interface Props {
+  lang: Lang;
+  currentPath: string;
+}
+
+const { lang, currentPath } = Astro.props;
+
+const navLinks = [
+  { key: 'nav.home', path: '/' },
+  { key: 'nav.verein', path: '/verein' },
+  { key: 'nav.tennishalle', path: '/tennishalle' },
+  { key: 'nav.mitgliedschaft', path: '/mitgliedschaft' },
+  { key: 'nav.kontakt', path: '/kontakt' },
+];
+---
+
+<div
+  class="fixed inset-0 z-[101] bg-mc-bg/95 backdrop-blur-xl flex flex-col items-center justify-center transition-all duration-300 opacity-0 pointer-events-none"
+  data-mobile-menu
+>
+  <button
+    class="absolute top-5 right-6 w-8 h-8 flex items-center justify-center"
+    aria-label="Close menu"
+    data-menu-close
+  >
+    <span class="block w-5 h-px bg-white/60 rotate-45 translate-y-px"></span>
+    <span class="block w-5 h-px bg-white/60 -rotate-45 -translate-y-px absolute"></span>
+  </button>
+
+  <nav class="flex flex-col items-center gap-8" aria-label="Mobile navigation">
+    {navLinks.map((link) => (
+      <a
+        href={getLocalizedPath(link.path, lang)}
+        class="text-white/70 text-2xl tracking-wide hover:text-mc-accent/80 transition-colors font-heading"
+      >
+        {t(link.key, lang)}
+      </a>
+    ))}
+  </nav>
+
+  <div class="mt-10">
+    <LanguageSwitcher lang={lang} currentPath={currentPath} />
+  </div>
+</div>
