@@ -90,3 +90,13 @@
     box-shadow: 0 0 8px 4px rgba(200, 255, 0, 0.15);
   }
 }
+
+.gentlePulse {
+  animation: gentlePulse 2s ease-in-out infinite;
+}
+
+/* ── Radial Gradient for Tennis Ball ── */
+
+.bg-gradient-radial {
+  background-image: radial-gradient(var(--tw-gradient-stops));
+}
