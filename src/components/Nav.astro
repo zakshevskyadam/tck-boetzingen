@@ -13,8 +13,9 @@ const { lang } = Astro.props;
 const navLinks = [
   { key: 'nav.home', path: '/' },
   { key: 'nav.verein', path: '/verein' },
-  { key: 'nav.tennishalle', path: '/tennishalle' },
-  { key: 'nav.mitgliedschaft', path: '/mitgliedschaft' },
+  { key: 'nav.termine', path: '/termine' },
+  { key: 'nav.buchung', path: 'https://buchung.tck-boetzingen.de', external: true },
+  { key: 'nav.fanshop', path: '/fanshop' },
   { key: 'nav.kontakt', path: '/kontakt' },
 ];
 ---
@@ -24,19 +25,31 @@ const navLinks = [
 >
   <nav class="flex items-center justify-between px-6 md:px-12 py-5" aria-label="Main navigation">
     <!-- Left: Logo -->
-    <a href={getLocalizedPath('/', lang)} class="font-heading text-xl text-mc-text flex items-center gap-0 shrink-0">
-      TCK<span class="inline-block w-1.5 h-1.5 rounded-full bg-mc-accent mx-0.5 translate-y-[1px]"></span>Bötzingen
+    <a href={getLocalizedPath('/', lang)} class="flex items-center gap-3 shrink-0">
+      <img src="/images/tck-icon.png" alt="TCK Bötzingen" class="h-10 w-10 rounded-full" />
+      <span class="font-heading text-lg text-mc-text hidden sm:inline">TCK Bötzingen</span>
     </a>
 
     <!-- Center: Nav links (desktop) -->
     <div class="hidden md:flex items-center gap-8">
       {navLinks.map((link) => (
-        <a
-          href={getLocalizedPath(link.path, lang)}
-          class="text-mc-text-muted text-[13px] tracking-wide hover:text-mc-accent transition-colors"
-        >
-          {t(link.key, lang)}
-        </a>
+        link.external ? (
+          <a
+            href={link.path}
+            target="_blank"
+            rel="noopener noreferrer"
+            class="text-mc-text-muted text-[13px] tracking-wide hover:text-mc-accent transition-colors"
+          >
+            {t(link.key, lang)}
+          </a>
+        ) : (
+          <a
+            href={getLocalizedPath(link.path, lang)}
+            class="text-mc-text-muted text-[13px] tracking-wide hover:text-mc-accent transition-colors"
+          >
+            {t(link.key, lang)}
+          </a>
+        )
       ))}
     </div>
 
@@ -44,6 +57,13 @@ const navLinks = [
     <div class="hidden md:flex items-center gap-3">
       <ThemeToggle />
       <LanguageSwitcher lang={lang} currentPath={Astro.url.pathname} />
+      <a
+        href="/login"
+        data-member-link
+        class="text-mc-text-muted text-[13px] tracking-wide hover:text-mc-accent transition-colors"
+      >
+        Login
+      </a>
       <div class="w-2.5 h-2.5 rounded-full bg-mc-accent gentlePulse"></div>
     </div>
 
@@ -95,6 +115,21 @@ const navLinks = [
     });
   }
 
+  function initMemberLink() {
+    const link = document.querySelector('[data-member-link]') as HTMLAnchorElement | null;
+    if (!link) return;
+    const hasSession = document.cookie.split(';').some(c => c.trim().startsWith('tck_logged_in='));
+    if (hasSession) {
+      link.textContent = 'Mein Bereich';
+      link.href = '/dashboard';
+    } else {
+      link.textContent = 'Login';
+      link.href = '/login';
+    }
+  }
+
   document.addEventListener('astro:page-load', initNav);
+  document.addEventListener('astro:page-load', initMemberLink);
   initNav();
+  initMemberLink();
 </script>

@@ -1,0 +1,15 @@
+---
+export const prerender = false;
+
+import { deleteSession, SESSION_COOKIE } from '../lib/auth';
+
+const sessionId = Astro.cookies.get(SESSION_COOKIE)?.value;
+if (sessionId) {
+  deleteSession(sessionId);
+}
+
+Astro.cookies.delete(SESSION_COOKIE, { path: '/' });
+Astro.cookies.delete('tck_logged_in', { path: '/' });
+
+return Astro.redirect('/');
+---

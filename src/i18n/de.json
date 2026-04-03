@@ -3,6 +3,9 @@
   "nav.verein": "Verein",
   "nav.tennishalle": "Tennishalle",
   "nav.mitgliedschaft": "Mitgliedschaft",
+  "nav.termine": "Termine",
+  "nav.buchung": "Buchung",
+  "nav.fanshop": "Fanshop",
   "nav.kontakt": "Kontakt",
 
   "hero.subtitle": "Tennisclub Kaiserstuhl",
@@ -111,5 +114,8 @@
   "footer.privacy": "Datenschutzerklärung",
   "footer.imprint": "Impressum",
   "footer.login": "Login",
-  "footer.copyright": "© {year} TCK Bötzingen e.V."
+  "footer.copyright": "© {year} TCK Bötzingen e.V.",
+
+  "nav.login": "Login",
+  "nav.dashboard": "Mein Bereich"
 }
