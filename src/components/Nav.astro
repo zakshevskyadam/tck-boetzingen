@@ -1,6 +1,7 @@
 ---
 import { t, getLocalizedPath, type Lang } from '../i18n/utils';
 import LanguageSwitcher from './LanguageSwitcher.astro';
+import ThemeToggle from './ThemeToggle.astro';
 import NavMobile from './NavMobile.astro';
 
 interface Props {
@@ -32,7 +33,7 @@ const navLinks = [
       {navLinks.map((link) => (
         <a
           href={getLocalizedPath(link.path, lang)}
-          class="text-white/50 text-[13px] tracking-wide hover:text-mc-accent/80 transition-colors"
+          class="text-mc-text-muted text-[13px] tracking-wide hover:text-mc-accent transition-colors"
         >
           {t(link.key, lang)}
         </a>
@@ -40,7 +41,8 @@ const navLinks = [
     </div>
 
     <!-- Right: Language switcher + ball accent -->
-    <div class="hidden md:flex items-center gap-4">
+    <div class="hidden md:flex items-center gap-3">
+      <ThemeToggle />
       <LanguageSwitcher lang={lang} currentPath={Astro.url.pathname} />
       <div class="w-2.5 h-2.5 rounded-full bg-mc-accent gentlePulse"></div>
     </div>

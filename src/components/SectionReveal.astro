@@ -6,8 +6,7 @@ const { class: className = '', delay = 0 } = Astro.props;
 </div>
 
 <script is:inline>
-if (!window.__revealInit) {
-  window.__revealInit = true;
+(function() {
   const observer = new IntersectionObserver((entries) => {
     entries.forEach(entry => {
       if (entry.isIntersecting) {
@@ -16,7 +15,21 @@ if (!window.__revealInit) {
         observer.unobserve(entry.target);
       }
     });
-  }, { threshold: 0.1 });
-  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
-}
+  }, { threshold: 0.05, rootMargin: '0px 0px -50px 0px' });
+
+  function initReveals() {
+    document.querySelectorAll('.reveal:not(.visible)').forEach(el => observer.observe(el));
+  }
+
+  // Run now
+  initReveals();
+
+  // Also run after DOM fully loaded (in case script runs before all elements)
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initReveals);
+  }
+
+  // Re-run on Astro page transitions
+  document.addEventListener('astro:page-load', initReveals);
+})();
 </script>

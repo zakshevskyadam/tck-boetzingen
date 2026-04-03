@@ -7,25 +7,75 @@ interface Props {
 }
 
 const { lang, currentPath } = Astro.props;
+const currentLang = LANGUAGES.find(l => l.code === lang)!;
 ---
 
-<nav aria-label="Language switcher" class="flex flex-row items-center gap-2">
-  {LANGUAGES.map((l) => {
-    const isActive = l.code === lang;
-    const href = getLocalizedPath(currentPath, l.code);
-    return (
-      <a
-        href={href}
-        class:list={[
-          'text-[12px] uppercase tracking-wide transition-colors',
-          isActive
-            ? 'text-mc-accent font-semibold'
-            : 'text-white/30 hover:text-mc-accent/80',
-        ]}
-        aria-current={isActive ? 'page' : undefined}
-      >
-        {l.code.toUpperCase()}
-      </a>
-    );
-  })}
-</nav>
+<div class="lang-switcher relative" data-open="false">
+  <button
+    class="lang-btn flex items-center gap-1.5 text-[12px] uppercase tracking-wide text-mc-accent cursor-pointer bg-transparent border border-mc-accent/20 rounded px-2.5 py-1.5 transition-all hover:border-mc-accent/40"
+    aria-label="Change language"
+    aria-expanded="false"
+  >
+    <span>{currentLang.code.toUpperCase()}</span>
+    <svg class="lang-chevron w-3 h-3 transition-transform duration-200" viewBox="0 0 12 12" fill="none">
+      <path d="M3 5L6 8L9 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+    </svg>
+  </button>
+
+  <div class="lang-dropdown absolute right-0 top-full mt-2 bg-mc-bg/95 backdrop-blur-md border border-mc-accent/10 rounded py-1 min-w-[120px] opacity-0 invisible translate-y-1 transition-all duration-200 z-50">
+    {LANGUAGES.map((l) => {
+      const isActive = l.code === lang;
+      const href = getLocalizedPath(currentPath, l.code);
+      return (
+        <a
+          href={href}
+          class:list={[
+            'flex items-center gap-2 px-3 py-2 text-[12px] tracking-wide transition-colors',
+            isActive
+              ? 'text-mc-accent bg-mc-accent/5'
+              : 'text-white/40 hover:text-mc-accent/80 hover:bg-white/[0.03]',
+          ]}
+          aria-current={isActive ? 'page' : undefined}
+        >
+          <span class="uppercase font-medium">{l.code.toUpperCase()}</span>
+          <span class="text-[11px] text-white/25">{l.name}</span>
+        </a>
+      );
+    })}
+  </div>
+</div>
+
+<script is:inline>
+document.querySelectorAll('.lang-switcher').forEach(switcher => {
+  const btn = switcher.querySelector('.lang-btn');
+  const dropdown = switcher.querySelector('.lang-dropdown');
+  const chevron = switcher.querySelector('.lang-chevron');
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const isOpen = switcher.dataset.open === 'true';
+    switcher.dataset.open = isOpen ? 'false' : 'true';
+    btn.setAttribute('aria-expanded', !isOpen);
+    if (!isOpen) {
+      dropdown.style.opacity = '1';
+      dropdown.style.visibility = 'visible';
+      dropdown.style.transform = 'translateY(0)';
+      chevron.style.transform = 'rotate(180deg)';
+    } else {
+      dropdown.style.opacity = '0';
+      dropdown.style.visibility = 'hidden';
+      dropdown.style.transform = 'translateY(4px)';
+      chevron.style.transform = 'rotate(0)';
+    }
+  });
+
+  document.addEventListener('click', () => {
+    switcher.dataset.open = 'false';
+    btn.setAttribute('aria-expanded', 'false');
+    dropdown.style.opacity = '0';
+    dropdown.style.visibility = 'hidden';
+    dropdown.style.transform = 'translateY(4px)';
+    chevron.style.transform = 'rotate(0)';
+  });
+});
+</script>
