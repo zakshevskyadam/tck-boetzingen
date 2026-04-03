@@ -1,0 +1,168 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import yaml from 'js-yaml';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import HeroAnimation from '../../components/HeroAnimation';
+import SectionReveal from '../../components/SectionReveal.astro';
+import StatsCounter from '../../components/StatsCounter';
+import Card from '../../components/Card.astro';
+import EventCard from '../../components/EventCard.astro';
+import { t, type Lang } from '../../i18n/utils';
+
+export function getStaticPaths() {
+  return ['en', 'fr', 'ru', 'uk', 'es'].map(lang => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+
+// Load events from Keystatic content
+const eventsDir = path.resolve('src/content/events');
+const eventSlugs = fs.readdirSync(eventsDir).filter((f: string) => {
+  const stat = fs.statSync(path.join(eventsDir, f));
+  return stat.isDirectory();
+});
+
+interface EventData {
+  title: string;
+  date: string;
+  description: string;
+}
+
+const events: EventData[] = eventSlugs
+  .map((slug: string) => {
+    const filePath = path.join(eventsDir, slug, 'index.yaml');
+    if (!fs.existsSync(filePath)) return null;
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    return yaml.load(raw) as EventData;
+  })
+  .filter((e): e is EventData => e !== null)
+  .filter((e) => new Date(e.date) >= new Date())
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+// Load club info
+const clubInfoPath = path.resolve('src/content/club-info/index.yaml');
+const clubInfo = yaml.load(fs.readFileSync(clubInfoPath, 'utf-8')) as {
+  memberCount: number;
+  courtCount: number;
+  hallCount: number;
+  teamCount: number;
+};
+---
+
+<BaseLayout title={t('hero.subtitle', lang) + ' – ' + t('hero.title', lang)} description={t('about.text', lang)} lang={lang}>
+
+  <!-- Hero -->
+  <HeroAnimation
+    client:load
+    texts={{
+      subtitle: t('hero.subtitle', lang),
+      title: t('hero.title', lang),
+      tagline: t('hero.tagline', lang),
+      cta: t('hero.cta', lang),
+      scroll: t('hero.scroll', lang),
+    }}
+  />
+
+  <!-- About -->
+  <section class="py-28 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('about.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">{t('about.title', lang)}</h2>
+        <p class="text-sm leading-relaxed text-white/40 max-w-2xl mb-12">{t('about.text', lang)}</p>
+        <StatsCounter
+          client:visible
+          items={[
+            { value: clubInfo.memberCount, label: t('stats.members', lang) },
+            { value: clubInfo.courtCount, label: t('stats.courts', lang) },
+            { value: clubInfo.hallCount, label: t('stats.indoor', lang) },
+            { value: clubInfo.teamCount, label: t('stats.teams', lang) },
+          ]}
+        />
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Offers -->
+  <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
+    <SectionReveal>
+      <div class="max-w-5xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('offer.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('offer.title', lang)}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          <Card
+            title={t('offer.hall.title', lang)}
+            description={t('offer.hall.desc', lang)}
+            icon="🎾"
+            href={`/${lang}/tennis-hall`}
+          />
+          <Card
+            title={t('offer.teams.title', lang)}
+            description={t('offer.teams.desc', lang)}
+            icon="👥"
+            href={`/${lang}/club#mannschaften`}
+          />
+          <Card
+            title={t('offer.training.title', lang)}
+            description={t('offer.training.desc', lang)}
+            icon="🏋️"
+            href={`/${lang}/club#trainer`}
+          />
+          <Card
+            title={t('offer.clubhouse.title', lang)}
+            description={t('offer.clubhouse.desc', lang)}
+            icon="🏠"
+          />
+          <Card
+            title={t('offer.booking.title', lang)}
+            description={t('offer.booking.desc', lang)}
+            icon="📱"
+            href="https://buchung.tck-boetzingen.de"
+          />
+          <Card
+            title={t('offer.fanshop.title', lang)}
+            description={t('offer.fanshop.desc', lang)}
+            icon="🛍️"
+          />
+        </div>
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Events -->
+  <section class="py-28 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('events.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('events.title', lang)}</h2>
+        {events.length > 0 ? (
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {events.map((event) => (
+              <EventCard title={event.title} date={event.date} description={event.description} />
+            ))}
+          </div>
+        ) : (
+          <p class="text-sm text-white/40">Keine anstehenden Veranstaltungen.</p>
+        )}
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- CTA -->
+  <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
+    <SectionReveal>
+      <div class="max-w-3xl mx-auto text-center">
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">{t('cta.title', lang)}</h2>
+        <p class="text-sm leading-relaxed text-white/40 mb-10 max-w-xl mx-auto">{t('cta.text', lang)}</p>
+        <a
+          href={`/${lang}/membership`}
+          class="cta-sweep inline-block px-9 py-3.5 border border-mc-accent/30 text-mc-accent/80 text-xs tracking-[3px] uppercase transition-colors hover:bg-mc-accent/10"
+        >
+          {t('cta.button', lang)}
+        </a>
+      </div>
+    </SectionReveal>
+  </section>
+
+</BaseLayout>

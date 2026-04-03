@@ -1,0 +1,93 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionReveal from '../../components/SectionReveal.astro';
+import ContactForm from '../../components/ContactForm.astro';
+import ZutrittsForm from '../../components/ZutrittsForm.astro';
+import LeafletMap from '../../components/LeafletMap.tsx';
+import { t, type Lang } from '../../i18n/utils';
+
+export function getStaticPaths() {
+  return ['en', 'fr', 'ru', 'uk', 'es'].map(lang => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+---
+
+<BaseLayout title={t('contact.info.title', lang) + ' – TCK Bötzingen'} description={t('contact.info.title', lang)} lang={lang}>
+
+  <!-- Contact Form -->
+  <section class="py-28 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('contact.info.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">Schreiben Sie uns</h2>
+        <p class="text-sm leading-relaxed text-white/40 max-w-2xl mb-10">
+          Haben Sie Fragen oder Anregungen? Füllen Sie das Formular aus und wir melden uns zeitnah bei Ihnen.
+        </p>
+        <ContactForm />
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Directions -->
+  <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('contact.map.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('contact.map.title', lang)}</h2>
+        <div class="mb-8 border border-mc-border overflow-hidden rounded">
+          <LeafletMap client:visible />
+        </div>
+        <div class="text-sm leading-relaxed text-white/40">
+          <p class="text-mc-text font-medium mb-1">Tennisclub Kaiserstuhl Bötzingen e.V.</p>
+          <p>Waldstraße 5</p>
+          <p>79268 Bötzingen</p>
+        </div>
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Access -->
+  <section class="py-28 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">Zutritt</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">Zutrittsberechtigung</h2>
+        <p class="text-sm leading-relaxed text-white/40 max-w-2xl mb-10">
+          Sie benötigen einen Schlüsselanhänger oder eine Schlüsselkarte für den Zugang zur Tennisanlage? Beantragen Sie hier Ihre Zutrittsberechtigung.
+        </p>
+        <ZutrittsForm />
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Contact Details -->
+  <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('contact.info.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('contact.info.title', lang)}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
+          <div class="bg-white/[0.02] border border-mc-border p-6">
+            <div class="text-xs tracking-[2px] text-white/30 uppercase mb-3">Telefon</div>
+            <a href="tel:+4976632440" class="text-mc-text hover:text-mc-accent/80 transition-colors text-sm">
+              07663-2440
+            </a>
+          </div>
+          <div class="bg-white/[0.02] border border-mc-border p-6">
+            <div class="text-xs tracking-[2px] text-white/30 uppercase mb-3">E-Mail</div>
+            <a href="mailto:info@tck-boetzingen.de" class="text-mc-text hover:text-mc-accent/80 transition-colors text-sm break-all">
+              info@tck-boetzingen.de
+            </a>
+          </div>
+          <div class="bg-white/[0.02] border border-mc-border p-6">
+            <div class="text-xs tracking-[2px] text-white/30 uppercase mb-3">Adresse</div>
+            <p class="text-sm text-mc-text">Waldstraße 5</p>
+            <p class="text-sm text-white/40">79268 Bötzingen</p>
+          </div>
+        </div>
+      </div>
+    </SectionReveal>
+  </section>
+
+</BaseLayout>
