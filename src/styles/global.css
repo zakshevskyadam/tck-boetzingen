@@ -73,6 +73,22 @@
   unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 
+/* ── Light Theme Override ── */
+
+[data-theme="light"] {
+  --color-mc-bg: #f5f5f0;
+  --color-mc-bg-alt: #eaeae5;
+  --color-mc-bg-end: #e0e0d8;
+  --color-mc-accent: #5a8a00;
+  --color-mc-accent-muted: rgba(90, 138, 0, 0.6);
+  --color-mc-text: #1a1a1a;
+  --color-mc-text-secondary: rgba(0, 0, 0, 0.65);
+  --color-mc-text-muted: rgba(0, 0, 0, 0.45);
+  --color-mc-border: rgba(0, 0, 0, 0.08);
+  --color-mc-court: rgba(90, 138, 0, 0.12);
+  --color-mc-court-bright: rgba(90, 138, 0, 0.2);
+}
+
 /* ── Base Styles ── */
 
 body {
@@ -84,4 +100,162 @@ body {
 ::selection {
   background: rgba(200, 255, 0, 0.2);
   color: #f0f0f0;
+}
+
+[data-theme="light"] ::selection {
+  background: rgba(90, 138, 0, 0.2);
+  color: #1a1a1a;
+}
+
+/* ── Theme-aware text helpers — white/X doesn't work in light mode ── */
+
+/* High-opacity white text → dark text equivalents */
+[data-theme="light"] .text-white\/70 {
+  color: rgba(0, 0, 0, 0.7);
+}
+[data-theme="light"] .text-white\/60 {
+  color: rgba(0, 0, 0, 0.6);
+}
+[data-theme="light"] .text-white\/50 {
+  color: var(--color-mc-text-secondary);
+}
+[data-theme="light"] .text-white\/40 {
+  color: var(--color-mc-text-secondary);
+}
+[data-theme="light"] .text-white\/35 {
+  color: var(--color-mc-text-muted);
+}
+[data-theme="light"] .text-white\/30 {
+  color: var(--color-mc-text-muted);
+}
+[data-theme="light"] .text-white\/25 {
+  color: rgba(0, 0, 0, 0.35);
+}
+[data-theme="light"] .text-white\/20 {
+  color: rgba(0, 0, 0, 0.3);
+}
+
+/* Hover states for white text */
+[data-theme="light"] .hover\:text-white\/60:hover {
+  color: rgba(0, 0, 0, 0.7);
+}
+[data-theme="light"] .hover\:text-white\/50:hover {
+  color: var(--color-mc-text-secondary);
+}
+[data-theme="light"] .hover\:text-white\/70:hover {
+  color: rgba(0, 0, 0, 0.8);
+}
+
+/* ── Background overrides ── */
+
+/* Semi-transparent white bg → semi-transparent dark bg */
+[data-theme="light"] .bg-white\/\[0\.02\] {
+  background-color: rgba(0, 0, 0, 0.025);
+}
+[data-theme="light"] .bg-white\/\[0\.03\] {
+  background-color: rgba(0, 0, 0, 0.035);
+}
+[data-theme="light"] .bg-white\/5 {
+  background-color: rgba(0, 0, 0, 0.04);
+}
+
+/* Hover state for table/list rows */
+[data-theme="light"] .hover\:bg-white\/\[0\.02\]:hover {
+  background-color: rgba(0, 0, 0, 0.035);
+}
+
+/* Nav & mobile menu overlay backgrounds */
+[data-theme="light"] .bg-mc-bg\/85 {
+  background-color: rgba(245, 245, 240, 0.92);
+}
+[data-theme="light"] .bg-mc-bg\/95 {
+  background-color: rgba(245, 245, 240, 0.97);
+}
+
+/* ── Hamburger / close-button bars ── */
+[data-theme="light"] .bg-white\/60 {
+  background-color: rgba(0, 0, 0, 0.55);
+}
+[data-theme="light"] [data-menu-toggle] span {
+  background-color: rgba(0, 0, 0, 0.55);
+}
+[data-theme="light"] [data-menu-close] span {
+  background-color: rgba(0, 0, 0, 0.55);
+}
+
+/* ── Accent-based elements that need light-theme tuning ── */
+
+/* CTA sweep: when accent bg is shown, text should stay dark (already dark in light mode) */
+[data-theme="light"] .cta-sweep:hover {
+  color: #fff;
+}
+
+/* Accent muted text opacity */
+[data-theme="light"] .text-mc-text-muted\/60 {
+  color: rgba(0, 0, 0, 0.35);
+}
+
+/* ── Form checkbox accent ── */
+[data-theme="light"] input[type="checkbox"] {
+  accent-color: var(--color-mc-accent);
+}
+
+/* ── Light theme hero adjustments ── */
+[data-theme="light"] .hero-ball-body {
+  background: radial-gradient(circle at 35% 35%, #7ab800, #5a8a00 40%, #3d6000 100%) !important;
+  box-shadow: 0 0 25px rgba(90,138,0,0.5), 0 0 60px rgba(90,138,0,0.15) !important;
+}
+
+[data-theme="light"] .hero-ball-body::before {
+  border-top-color: rgba(255,255,255,0.35) !important;
+  border-bottom-color: rgba(255,255,255,0.35) !important;
+}
+
+[data-theme="light"] .hero-impact {
+  background: #5a8a00 !important;
+}
+
+[data-theme="light"] .hero-impact::after {
+  border-color: rgba(90,138,0,0.4) !important;
+}
+
+[data-theme="light"] .hero-ripple {
+  border-color: rgba(90,138,0,0.3) !important;
+}
+
+[data-theme="light"] .hero-corner-ball {
+  background: #5a8a00 !important;
+  box-shadow: 0 0 15px rgba(90,138,0,0.4) !important;
+}
+
+[data-theme="light"] .hero-text-sub {
+  color: var(--color-mc-accent-muted) !important;
+}
+
+[data-theme="light"] .hero-text-tagline {
+  color: var(--color-mc-text-muted) !important;
+}
+
+[data-theme="light"] .hero-text-cta {
+  border-color: rgba(90,138,0,0.4) !important;
+  color: var(--color-mc-accent) !important;
+}
+
+[data-theme="light"] .hero-text-cta:hover {
+  background: rgba(90,138,0,0.08) !important;
+  border-color: rgba(90,138,0,0.6) !important;
+}
+
+[data-theme="light"] .hero-scroll-hint span {
+  color: var(--color-mc-text-muted) !important;
+}
+
+[data-theme="light"] .hero-scroll-line {
+  background: linear-gradient(180deg, rgba(90,138,0,0.3), transparent) !important;
+}
+
+/* ── Leaflet marker light theme ── */
+[data-theme="light"] .leaflet-marker-icon div {
+  background: #5a8a00 !important;
+  box-shadow: 0 0 10px rgba(90,138,0,0.5) !important;
 }

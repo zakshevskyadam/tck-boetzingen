@@ -1,5 +1,4 @@
 import { useEffect, useRef } from 'react';
-import gsap from 'gsap';
 import CourtSVG from './CourtSVG';
 
 interface HeroTexts {
@@ -11,188 +10,315 @@ interface HeroTexts {
 }
 
 export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
-  const containerRef = useRef<HTMLElement>(null);
-  const ballRef = useRef<HTMLDivElement>(null);
-  const impactRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const rippleRefs = useRef<(HTMLDivElement | null)[]>([]);
-  const courtRef = useRef<HTMLDivElement>(null);
-  const cornerBallRef = useRef<HTMLDivElement>(null);
-  const contentRef = useRef<HTMLDivElement>(null);
-  const dividerRef = useRef<HTMLDivElement>(null);
-  const taglineRef = useRef<HTMLDivElement>(null);
-  const ctaRef = useRef<HTMLAnchorElement>(null);
-  const scrollRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
     const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (prefersReduced) {
-      gsap.set(
-        [
-          courtRef.current,
-          contentRef.current,
-          dividerRef.current,
-          taglineRef.current,
-          ctaRef.current,
-          cornerBallRef.current,
-          scrollRef.current,
-        ],
-        { autoAlpha: 1, scaleX: 1 },
-      );
-      return;
+    if (prefersReduced && heroRef.current) {
+      heroRef.current.classList.add('no-motion');
     }
-
-    const isMobile = window.innerWidth < 768;
-    const ctx = gsap.context(() => {
-      const tl = gsap.timeline();
-
-      const bouncePoints = isMobile
-        ? [
-            { x: '70vw', y: '60vh' },
-            { x: '49vw', y: '48vh' },
-          ]
-        : [
-            { x: '70vw', y: '65vh' },
-            { x: '15vw', y: '20vh' },
-            { x: '75vw', y: '70vh' },
-            { x: '49vw', y: '48vh' },
-          ];
-
-      // Start ball
-      tl.set(ballRef.current, { left: '-5%', top: '-5%', opacity: 0, scale: 0.5 }).to(
-        ballRef.current,
-        { opacity: 1, scale: 1, duration: 0.2 },
-      );
-
-      // Animate through bounce points
-      bouncePoints.forEach((point, i) => {
-        const isLast = i === bouncePoints.length - 1;
-        // Fly to point
-        tl.to(ballRef.current, {
-          left: point.x,
-          top: point.y,
-          duration: 0.6,
-          ease: 'power2.inOut',
-          rotation: `+=${360}`,
-        })
-          // Squash on impact
-          .to(ballRef.current, { scaleX: 1.2, scaleY: 0.8, duration: 0.05 })
-          .to(ballRef.current, { scaleX: 0.9, scaleY: 1.1, duration: 0.08 })
-          .to(ballRef.current, { scaleX: 1, scaleY: 1, duration: 0.05 })
-          // Impact flash
-          .fromTo(
-            impactRefs.current[i],
-            { left: point.x, top: point.y, width: 8, height: 8, opacity: 1 },
-            { width: 80, height: 80, opacity: 0, duration: 0.6, marginLeft: -36, marginTop: -36 },
-            '<',
-          );
-
-        // Ripples on last bounce
-        if (isLast) {
-          rippleRefs.current.forEach((r, ri) => {
-            tl.fromTo(
-              r,
-              { width: 10, height: 10, opacity: 0.5 },
-              { width: 300, height: 300, opacity: 0, duration: 1.2 },
-              `<+=${ri * 0.15}`,
-            );
-          });
-        }
-      });
-
-      // Fade ball out
-      tl.to(ballRef.current, { opacity: 0, scale: 0.6, duration: 0.3 });
-
-      // Phase 2: Court reveal
-      tl.to(courtRef.current, { autoAlpha: 1, scale: 1, duration: 0.8, ease: 'power2.out' }, '-=0.3');
-
-      // Phase 3: Content reveal
-      tl.to(contentRef.current, { autoAlpha: 1, y: 0, duration: 0.8, ease: 'power2.out' }, '-=0.4')
-        .to(dividerRef.current, { scaleX: 1, duration: 0.5 }, '-=0.3')
-        .to(taglineRef.current, { autoAlpha: 1, duration: 0.6 }, '-=0.2')
-        .to(ctaRef.current, { autoAlpha: 1, duration: 0.6 }, '-=0.3')
-        .to(cornerBallRef.current, { autoAlpha: 1, duration: 0.4 }, '-=0.4')
-        .to(scrollRef.current, { autoAlpha: 1, duration: 0.6 }, '-=0.2');
-    }, containerRef);
-
-    return () => ctx.revert();
   }, []);
 
   return (
-    <section
-      ref={containerRef}
-      className="relative h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-mc-bg via-mc-bg-alt to-mc-bg-end"
-    >
-      {/* Ball element */}
-      <div ref={ballRef} className="absolute w-[22px] h-[22px] z-40 opacity-0">
-        <div className="w-full h-full rounded-full bg-gradient-radial from-[#e8ff5a] via-[#c8ff00] to-[#9abf00] shadow-[0_0_25px_rgba(200,255,0,0.6)]" />
-      </div>
+    <>
+      <style>{`
+        /* ===== BALL ===== */
+        .hero-ball {
+          position: absolute;
+          width: 22px; height: 22px;
+          z-index: 40;
+          animation: snakePath 2s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+          opacity: 0;
+        }
+        .hero-ball-body {
+          width: 100%; height: 100%;
+          background: radial-gradient(circle at 35% 35%, #e8ff5a, #c8ff00 40%, #9abf00 100%);
+          border-radius: 50%;
+          box-shadow: 0 0 25px rgba(200,255,0,0.6), 0 0 60px rgba(200,255,0,0.2);
+          animation: ballSpin 2s linear 0.1s;
+          position: relative;
+        }
+        .hero-ball-body::before {
+          content: '';
+          position: absolute;
+          inset: 2px;
+          border-radius: 50%;
+          background: transparent;
+          border-top: 1.5px solid rgba(255,255,255,0.2);
+          border-bottom: 1.5px solid rgba(255,255,255,0.2);
+          transform: rotate(-30deg);
+        }
 
-      {/* Impact flashes */}
-      {[0, 1, 2, 3].map((i) => (
-        <div
-          key={i}
-          ref={(el) => { impactRefs.current[i] = el; }}
-          className="absolute w-2 h-2 bg-mc-accent rounded-full opacity-0 z-30"
-        />
-      ))}
+        @keyframes ballSpin {
+          from { transform: rotate(0deg); }
+          to { transform: rotate(1440deg); }
+        }
 
-      {/* Ripple rings */}
-      {[0, 1, 2].map((i) => (
-        <div
-          key={i}
-          ref={(el) => { rippleRefs.current[i] = el; }}
-          className="absolute w-2 h-2 border border-mc-accent/25 rounded-full opacity-0 z-30"
-          style={{ left: '50%', top: '49%', transform: 'translate(-50%, -50%)' }}
-        />
-      ))}
+        /* Court is roughly 12%-88% horizontal, 22%-78% vertical in viewport */
+        @keyframes snakePath {
+          0%   { left: 12%;  top: 22%;  opacity: 0; transform: scale(0.5); }
+          3%   { opacity: 1; transform: scale(1); }
+          /* Bounce 1: top-left → bottom-right of court */
+          18%  { left: 75%;  top: 68%; transform: scale(1.15, 0.85); }
+          20%  { left: 74%;  top: 65%; transform: scale(0.9, 1.1); }
+          /* Bounce 2: → top-left of court */
+          38%  { left: 20%;  top: 28%; transform: scale(1.1, 0.9); }
+          40%  { left: 21%;  top: 30%; transform: scale(0.9, 1.1); }
+          /* Bounce 3: → bottom-right of court */
+          58%  { left: 72%;  top: 70%; transform: scale(1.15, 0.85); }
+          60%  { left: 71%;  top: 67%; transform: scale(0.9, 1.1); }
+          /* Bounce 4: → center of court */
+          78%  { left: 50%;  top: 50%; transform: translate(-50%, -50%) scale(1.2, 0.8); }
+          82%  { left: 50%;  top: 50%; transform: translate(-50%, -50%) scale(0.95, 1.05); }
+          90%  { left: 50%; top: 50%; transform: translate(-50%, -50%) scale(1); opacity: 1; }
+          100% { left: 50%; top: 50%; transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+        }
 
-      {/* Court SVG */}
-      <div
-        ref={courtRef}
-        className="absolute w-[76%] max-w-[860px] top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 z-10"
-        style={{ perspective: '900px', transform: 'translate(-50%, -50%) perspective(900px) rotateX(6deg)' }}
+        /* ===== IMPACT FLASHES ===== */
+        .hero-impact {
+          position: absolute;
+          width: 8px; height: 8px;
+          background: #c8ff00;
+          border-radius: 50%;
+          opacity: 0;
+          z-index: 35;
+          pointer-events: none;
+        }
+        .hero-impact::after {
+          content: '';
+          position: absolute;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%);
+          width: 8px; height: 8px;
+          border: 1px solid rgba(200,255,0,0.4);
+          border-radius: 50%;
+          animation: inherit;
+          animation-delay: inherit;
+        }
+        .hero-impact-1 { left: 75%; top: 68%; animation: impactBurst 0.5s ease 0.50s forwards; }
+        .hero-impact-2 { left: 20%; top: 28%; animation: impactBurst 0.5s ease 0.90s forwards; }
+        .hero-impact-3 { left: 72%; top: 70%; animation: impactBurst 0.5s ease 1.30s forwards; }
+        .hero-impact-4 { left: 50%; top: 50%; transform: translate(-50%, -50%); animation: impactBurst 0.6s ease 1.70s forwards; }
+
+        @keyframes impactBurst {
+          0%   { opacity: 1; width: 8px; height: 8px;
+                 box-shadow: 0 0 20px rgba(200,255,0,0.8); }
+          100% { opacity: 0; width: 80px; height: 80px;
+                 box-shadow: 0 0 0 rgba(200,255,0,0); margin-left: -36px; margin-top: -36px; }
+        }
+
+        /* ===== RIPPLE RINGS ===== */
+        .hero-ripple {
+          position: absolute; left: 50%; top: 49%;
+          transform: translate(-50%, -50%);
+          border-radius: 50%;
+          border: 1px solid rgba(200,255,0,0.25);
+          opacity: 0; z-index: 34;
+        }
+        .hero-fr1 { width: 10px; height: 10px; animation: rippleOut 1.2s ease 1.70s forwards; }
+        .hero-fr2 { width: 10px; height: 10px; animation: rippleOut 1.2s ease 1.82s forwards; }
+        .hero-fr3 { width: 10px; height: 10px; animation: rippleOut 1.2s ease 1.94s forwards; }
+
+        @keyframes rippleOut {
+          0%   { opacity: 0.5; width: 10px; height: 10px; }
+          100% { opacity: 0; width: 400px; height: 400px; }
+        }
+
+        /* ===== COURT ===== */
+        .hero-court {
+          position: absolute;
+          width: 76%; max-width: 860px;
+          top: 50%; left: 50%;
+          transform: translate(-50%, -50%) perspective(900px) rotateX(6deg);
+          opacity: 0;
+          z-index: 10;
+          animation: courtAppear 1.5s ease 0.4s forwards;
+        }
+        @keyframes courtAppear {
+          0%   { opacity: 0; transform: translate(-50%, -50%) perspective(900px) rotateX(6deg) scale(0.95); }
+          100% { opacity: 1; transform: translate(-50%, -50%) perspective(900px) rotateX(6deg) scale(1); }
+        }
+
+        /* ===== CONTENT ===== */
+        .hero-text-content {
+          text-align: center; z-index: 30; position: relative;
+          opacity: 0;
+          animation: contentReveal 0.8s ease 2.3s forwards;
+        }
+        @keyframes contentReveal {
+          0%   { opacity: 0; transform: translateY(25px); }
+          100% { opacity: 1; transform: translateY(0); }
+        }
+        .hero-text-sub {
+          font-family: 'Playfair Display', Georgia, serif;
+          font-size: 14px; letter-spacing: 6px; color: var(--color-mc-accent-muted);
+          text-transform: uppercase; margin-bottom: 16px;
+        }
+        .hero-text-title {
+          font-family: 'Playfair Display', Georgia, serif;
+          font-size: 72px; font-weight: 300; color: var(--color-mc-text);
+          letter-spacing: 4px; line-height: 1.1;
+        }
+        .hero-text-divider {
+          width: 50px; height: 2px; margin: 24px auto;
+          background: linear-gradient(90deg, var(--color-mc-accent), transparent);
+          transform: scaleX(0); transform-origin: left;
+          animation: drawH 0.5s ease 2.7s forwards;
+        }
+        @keyframes drawH { to { transform: scaleX(1); } }
+        .hero-text-tagline {
+          font-size: 12px; color: rgba(255,255,255,0.4); letter-spacing: 3px;
+          opacity: 0;
+          animation: heroFadeIn 0.6s ease 2.9s forwards;
+        }
+        .hero-text-cta {
+          display: inline-block; margin-top: 40px;
+          padding: 14px 36px;
+          border: 1px solid rgba(200,255,0,0.3);
+          color: rgba(200,255,0,0.8);
+          font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+          text-decoration: none;
+          opacity: 0;
+          animation: heroFadeIn 0.6s ease 3.1s forwards;
+          transition: all 0.4s;
+          position: relative; overflow: hidden;
+        }
+        .hero-text-cta:hover {
+          background: rgba(200,255,0,0.08);
+          border-color: rgba(200,255,0,0.6);
+        }
+        @keyframes heroFadeIn { to { opacity: 1; } }
+
+        /* ===== CORNER BALL ===== */
+        .hero-corner-ball {
+          position: absolute; top: 24px; right: 32px;
+          width: 10px; height: 10px;
+          background: #c8ff00; border-radius: 50%;
+          box-shadow: 0 0 20px rgba(200,255,0,0.4);
+          opacity: 0; z-index: 50;
+          animation: heroFadeIn 0.4s ease 2.1s forwards, heroGentlePulse 3s ease 3s infinite;
+        }
+        @keyframes heroGentlePulse {
+          0%, 100% { box-shadow: 0 0 20px rgba(200,255,0,0.3); }
+          50% { box-shadow: 0 0 30px rgba(200,255,0,0.5), 0 0 60px rgba(200,255,0,0.15); }
+        }
+
+        /* ===== SCROLL HINT ===== */
+        .hero-scroll-hint {
+          position: absolute; bottom: 40px; left: 50%;
+          transform: translateX(-50%);
+          display: flex; flex-direction: column; align-items: center; gap: 8px;
+          opacity: 0; z-index: 30;
+          animation: heroFadeIn 0.8s ease 3.3s forwards;
+        }
+        .hero-scroll-hint span { font-size: 10px; letter-spacing: 3px; color: rgba(255,255,255,0.2); }
+        .hero-scroll-line {
+          width: 1px; height: 30px;
+          background: linear-gradient(180deg, rgba(200,255,0,0.3), transparent);
+          animation: scrollPulse 2s ease infinite;
+        }
+        @keyframes scrollPulse {
+          0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
+          50% { opacity: 1; transform: scaleY(1); }
+        }
+
+        /* ===== LIGHT THEME KEYFRAME OVERRIDES ===== */
+        @keyframes impactBurstLight {
+          0%   { opacity: 1; width: 8px; height: 8px;
+                 box-shadow: 0 0 20px rgba(90,138,0,0.8); }
+          100% { opacity: 0; width: 80px; height: 80px;
+                 box-shadow: 0 0 0 rgba(90,138,0,0); margin-left: -36px; margin-top: -36px; }
+        }
+        @keyframes heroGentlePulseLight {
+          0%, 100% { box-shadow: 0 0 20px rgba(90,138,0,0.3); }
+          50% { box-shadow: 0 0 30px rgba(90,138,0,0.5), 0 0 60px rgba(90,138,0,0.15); }
+        }
+        @keyframes scrollPulseLight {
+          0%, 100% { opacity: 0.3; transform: scaleY(0.6); }
+          50% { opacity: 1; transform: scaleY(1); }
+        }
+
+        [data-theme="light"] .hero-impact-1 { animation: impactBurstLight 0.5s ease 0.50s forwards; }
+        [data-theme="light"] .hero-impact-2 { animation: impactBurstLight 0.5s ease 0.90s forwards; }
+        [data-theme="light"] .hero-impact-3 { animation: impactBurstLight 0.5s ease 1.30s forwards; }
+        [data-theme="light"] .hero-impact-4 { animation: impactBurstLight 0.6s ease 1.70s forwards; }
+        [data-theme="light"] .hero-corner-ball {
+          animation: heroFadeIn 0.4s ease 2.1s forwards, heroGentlePulseLight 3s ease 3s infinite;
+        }
+
+        /* ===== MOBILE ===== */
+        @media (max-width: 768px) {
+          .hero-text-title { font-size: 48px; letter-spacing: 2px; }
+          .hero-text-sub { font-size: 11px; letter-spacing: 4px; }
+        }
+
+        /* ===== REDUCED MOTION ===== */
+        .no-motion .hero-ball,
+        .no-motion .hero-impact,
+        .no-motion .hero-ripple { display: none; }
+        .no-motion .hero-court,
+        .no-motion .hero-text-content,
+        .no-motion .hero-text-tagline,
+        .no-motion .hero-text-cta,
+        .no-motion .hero-corner-ball,
+        .no-motion .hero-scroll-hint,
+        .no-motion .hero-text-divider {
+          opacity: 1 !important;
+          animation: none !important;
+          transform: translate(-50%, -50%) perspective(900px) rotateX(6deg) scale(1);
+        }
+        .no-motion .hero-text-content {
+          transform: translateY(0) !important;
+        }
+        .no-motion .hero-text-divider {
+          transform: scaleX(1) !important;
+        }
+      `}</style>
+
+      <section
+        ref={heroRef}
+        className="relative h-screen flex items-center justify-center overflow-hidden"
+        style={{ background: 'linear-gradient(160deg, var(--color-mc-bg) 0%, var(--color-mc-bg-alt) 40%, var(--color-mc-bg-end) 100%)' }}
       >
-        <CourtSVG />
-      </div>
-
-      {/* Ball corner accent */}
-      <div
-        ref={cornerBallRef}
-        className="absolute top-6 right-8 w-[10px] h-[10px] bg-mc-accent rounded-full shadow-[0_0_20px_rgba(200,255,0,0.4)] opacity-0 z-50 gentlePulse"
-      />
-
-      {/* Content */}
-      <div ref={contentRef} className="text-center z-30 relative opacity-0">
-        <div className="font-heading text-sm tracking-[6px] text-mc-accent/60 uppercase mb-4">
-          {texts.subtitle}
+        {/* Ball */}
+        <div className="hero-ball">
+          <div className="hero-ball-body" />
         </div>
-        <h1 className="font-heading text-7xl font-light text-mc-text tracking-[4px] leading-tight">
-          {texts.title}
-        </h1>
-        <div
-          ref={dividerRef}
-          className="w-[50px] h-[2px] mx-auto my-6 bg-gradient-to-r from-mc-accent to-mc-accent/20 scale-x-0 origin-left"
-        />
-        <div ref={taglineRef} className="text-xs text-white/40 tracking-[3px] opacity-0">
-          {texts.tagline}
-        </div>
-        <a
-          ref={ctaRef}
-          href="#"
-          className="cta-sweep inline-block mt-10 px-9 py-3.5 border border-mc-accent/30 text-mc-accent/80 text-xs tracking-[3px] uppercase opacity-0"
-        >
-          {texts.cta}
-        </a>
-      </div>
 
-      {/* Scroll hint */}
-      <div
-        ref={scrollRef}
-        className="absolute bottom-10 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 opacity-0 z-30"
-      >
-        <span className="text-[10px] tracking-[3px] text-white/20">{texts.scroll}</span>
-        <div className="w-px h-[30px] bg-gradient-to-b from-mc-accent/30 to-transparent animate-pulse" />
-      </div>
-    </section>
+        {/* Impact flashes */}
+        <div className="hero-impact hero-impact-1" />
+        <div className="hero-impact hero-impact-2" />
+        <div className="hero-impact hero-impact-3" />
+        <div className="hero-impact hero-impact-4" />
+
+        {/* Final bounce ripples */}
+        <div className="hero-ripple hero-fr1" />
+        <div className="hero-ripple hero-fr2" />
+        <div className="hero-ripple hero-fr3" />
+
+        {/* Court */}
+        <div className="hero-court">
+          <CourtSVG />
+        </div>
+
+        {/* Corner ball accent */}
+        <div className="hero-corner-ball" />
+
+        {/* Content */}
+        <div className="hero-text-content">
+          <div className="hero-text-sub">{texts.subtitle}</div>
+          <h1 className="hero-text-title">{texts.title}</h1>
+          <div className="hero-text-divider" />
+          <div className="hero-text-tagline">{texts.tagline}</div>
+          <a href="#about" className="hero-text-cta">{texts.cta}</a>
+        </div>
+
+        {/* Scroll hint */}
+        <div className="hero-scroll-hint">
+          <span>{texts.scroll}</span>
+          <div className="hero-scroll-line" />
+        </div>
+      </section>
+    </>
   );
 }
