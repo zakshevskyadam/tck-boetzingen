@@ -24,7 +24,7 @@
     if (typeof localStorage !== 'undefined' && localStorage.getItem('theme')) {
       return localStorage.getItem('theme');
     }
-    return 'dark';
+    return 'light';
   }
 
   function setTheme(theme) {
@@ -40,12 +40,6 @@
     document.querySelectorAll('.theme-icon-moon').forEach(el => {
       el.style.display = theme === 'light' ? 'block' : 'none';
     });
-  }
-
-  // Apply on load (before paint)
-  const current = getTheme();
-  if (current === 'light') {
-    document.documentElement.setAttribute('data-theme', 'light');
   }
 
   // Init buttons
