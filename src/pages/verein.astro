@@ -122,7 +122,7 @@ const trainingSchedule = [
         <Collapsible client:load title="🎾 Tennishalle" defaultOpen={true}>
           <div class="space-y-4 text-sm leading-relaxed text-white/70">
             <div class="rounded overflow-hidden mb-4 border border-mc-border">
-              <img src="/images/gallery/tennishalle.jpg" alt="Tennishalle des TCK Bötzingen" class="w-full h-[200px] md:h-[280px] object-cover" loading="lazy" />
+              <img src="/images/gallery/tennishalle.jpg" alt="Tennishalle des TCK Bötzingen" class="w-full h-auto" loading="lazy" />
             </div>
             <p>
               Unsere 2-Feld-Halle mit Teppichbelag und Granulat bietet optimale Spielbedingungen von <strong class="text-mc-text">Oktober bis April</strong>. Licht und Heizung inklusive. Die Halle steht Mitgliedern und Gästen offen.
@@ -159,7 +159,7 @@ const trainingSchedule = [
         <Collapsible client:load title="👥 Mitgliedschaft & Beiträge">
           <div class="space-y-6 text-sm leading-relaxed text-white/70">
             <div class="rounded overflow-hidden border border-mc-border">
-              <img src="/images/gallery/clubhaus-blumen.jpg" alt="Clubhaus TCK Bötzingen" class="w-full h-[200px] md:h-[280px] object-cover" loading="lazy" />
+              <img src="/images/gallery/clubhaus-blumen.jpg" alt="Clubhaus TCK Bötzingen" class="w-full h-auto" loading="lazy" />
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div class="bg-mc-accent/[0.04] border border-mc-accent/20 p-5">
@@ -215,7 +215,7 @@ const trainingSchedule = [
         <Collapsible client:load title="🏅 Mannschaften">
           <div class="space-y-6">
             <div class="rounded overflow-hidden mb-2 border border-mc-border">
-              <img src="/images/gallery/anlage-panorama.jpg" alt="TCK Bötzingen Anlage" class="w-full h-[200px] md:h-[280px] object-cover" loading="lazy" />
+              <img src="/images/gallery/anlage-panorama.jpg" alt="TCK Bötzingen Anlage" class="w-full h-auto" loading="lazy" />
             </div>
             <p class="text-sm leading-relaxed text-white/70">
               Jedes Jahr nehmen mehrere Mannschaften in verschiedenen Altersklassen an den Meisterschaften des Badischen Tennisverbandes teil — von der U9-Jugend bis zu den Herren/Damen 60.
@@ -245,17 +245,15 @@ const trainingSchedule = [
         <!-- Training -->
         <Collapsible client:load title="🎯 Training">
           <div class="text-sm leading-relaxed text-white/70">
-            <div class="rounded overflow-hidden mb-4 border border-mc-border">
-              <img src="/images/gallery/platz7.jpg" alt="Außenplatz TCK Bötzingen" class="w-full h-[200px] md:h-[280px] object-cover" loading="lazy" />
-            </div>
-            <div class="bg-white/[0.02] border border-mc-border p-6">
-              <div class="flex items-start gap-5">
-                <div class="w-12 h-12 rounded-full bg-mc-accent/10 flex items-center justify-center flex-shrink-0">
-                  <span class="text-xl">🎾</span>
+            <div class="bg-white/[0.02] border border-mc-border p-6 md:p-8">
+              <div class="flex flex-col sm:flex-row items-start gap-6">
+                <div class="flex-shrink-0 w-full sm:w-48">
+                  <img src="/images/luiz-weller.png" alt="Luiz Weller — Clubtrainer" class="w-full rounded border border-mc-border" loading="lazy" />
                 </div>
-                <div>
-                  <span class="text-[11px] tracking-[2px] uppercase text-mc-accent block mb-1">Tennis-Welt Süd</span>
-                  <h4 class="font-heading text-xl text-mc-text mb-3">Luiz Weller</h4>
+                <div class="flex-1">
+                  <img src="/images/tenniswelt-logo.png" alt="Tennis-Welt Süd" class="h-10 mb-3 opacity-90" loading="lazy" />
+                  <span class="text-[11px] tracking-[2px] uppercase text-mc-accent block mb-1">Clubtrainer</span>
+                  <h4 class="font-heading text-2xl text-mc-text mb-3">Luiz Weller</h4>
                   <p class="mb-3">
                     Das Training wird seit vielen Jahren von der Tennis-Welt Süd unter der Leitung von Luiz Weller durchgeführt. Gut ausgebildete Trainer mit DTB-Lizenzen garantieren qualifiziertes Training für alle Altersklassen.
                   </p>

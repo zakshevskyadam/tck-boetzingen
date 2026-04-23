@@ -8,21 +8,28 @@ import SectionReveal from '../components/SectionReveal.astro';
 import StatsCounter from '../components/StatsCounter';
 import Card from '../components/Card.astro';
 import EventCard from '../components/EventCard.astro';
-import PhotoMarquee from '../components/PhotoMarquee.astro';
 import { t, type Lang } from '../i18n/utils';
 
-const galleryImages = [
-  { src: '/images/gallery/placeholder-1.svg', alt: 'Clubanlage' },
-  { src: '/images/gallery/placeholder-2.svg', alt: 'Sandplätze' },
-  { src: '/images/gallery/placeholder-3.svg', alt: 'Tennishalle' },
-  { src: '/images/gallery/placeholder-4.svg', alt: 'Clubhaus' },
-  { src: '/images/gallery/placeholder-5.svg', alt: 'Jugendtraining' },
-  { src: '/images/gallery/placeholder-6.svg', alt: 'Mannschaft' },
-  { src: '/images/gallery/placeholder-7.svg', alt: 'Sommerfest' },
-  { src: '/images/gallery/placeholder-8.svg', alt: 'Vereinsleben' },
-];
-
 const lang: Lang = 'de';
+
+// Load news
+const newsDir = path.resolve('src/content/news');
+const newsSlugs = fs.readdirSync(newsDir).filter((f: string) => {
+  const stat = fs.statSync(path.join(newsDir, f));
+  return stat.isDirectory();
+});
+
+interface NewsItem { title: string; date: string; excerpt: string; }
+
+const news: NewsItem[] = newsSlugs
+  .map((slug: string) => {
+    const fp = path.join(newsDir, slug, 'index.yaml');
+    if (!fs.existsSync(fp)) return null;
+    return yaml.load(fs.readFileSync(fp, 'utf-8')) as NewsItem;
+  })
+  .filter((n): n is NewsItem => n !== null)
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+  .slice(0, 3);
 
 // Load events from Keystatic content
 const eventsDir = path.resolve('src/content/events');
@@ -143,8 +150,33 @@ const clubInfo = yaml.load(fs.readFileSync(clubInfoPath, 'utf-8')) as {
     </SectionReveal>
   </section>
 
-  <!-- Termine -->
+  <!-- News -->
   <section class="py-28 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-5xl mx-auto">
+        <div class="flex items-end justify-between mb-10">
+          <div>
+            <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">Neuigkeiten</div>
+            <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide">Aktuelles aus dem Verein</h2>
+          </div>
+        </div>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {news.map((item) => (
+            <article class="bg-white/[0.02] border border-mc-border p-6 hover:border-mc-accent/20 transition-colors">
+              <time class="text-[11px] tracking-[2px] text-mc-accent/60 uppercase block mb-3">
+                {new Date(item.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
+              </time>
+              <h3 class="font-heading text-lg text-mc-text mb-3 leading-tight">{item.title}</h3>
+              <p class="text-sm leading-relaxed text-white/70">{item.excerpt}</p>
+            </article>
+          ))}
+        </div>
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Termine -->
+  <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
     <SectionReveal>
       <div class="max-w-4xl mx-auto">
         <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('events.label', lang)}</div>
@@ -163,7 +195,7 @@ const clubInfo = yaml.load(fs.readFileSync(clubInfoPath, 'utf-8')) as {
   </section>
 
   <!-- CTA -->
-  <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
+  <section class="py-28 px-6 md:px-12">
     <SectionReveal>
       <div class="max-w-3xl mx-auto text-center">
         <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">{t('cta.title', lang)}</h2>

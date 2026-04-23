@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import 'leaflet/dist/leaflet.css';
 
 export default function LeafletMap() {
   const mapRef = useRef<HTMLDivElement>(null);
@@ -6,7 +7,6 @@ export default function LeafletMap() {
   useEffect(() => {
     let map: any;
     import('leaflet').then((L) => {
-      import('leaflet/dist/leaflet.css');
       if (!mapRef.current) return;
 
       const isDark = document.documentElement.getAttribute('data-theme') !== 'light';

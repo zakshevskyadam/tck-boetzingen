@@ -97,13 +97,13 @@ export default function FaqAccordion({ categories }: Props) {
   return (
     <div>
       {/* Category tabs */}
-      <div className="flex gap-1 overflow-x-auto pb-4 mb-6 border-b border-mc-border scrollbar-none">
+      <div className="flex flex-wrap gap-1 pb-4 mb-6 border-b border-mc-border">
         {categories.map((cat, i) => (
           <button
             key={cat.name}
             type="button"
             onClick={() => handleCategoryChange(i)}
-            className={`whitespace-nowrap px-4 py-2 text-xs tracking-[1px] uppercase transition-colors cursor-pointer ${
+            className={`px-3 py-2 text-xs tracking-[1px] uppercase transition-colors cursor-pointer ${
               i === activeCategory
                 ? 'text-mc-accent border-b-2 border-mc-accent'
                 : 'text-white/55 hover:text-white/75'

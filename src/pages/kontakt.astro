@@ -99,7 +99,7 @@ const boardMembers: BoardMember[] = boardSlugs
         <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">Anfahrt</div>
         <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">So finden Sie uns</h2>
         <div class="border border-mc-border overflow-hidden rounded">
-          <LeafletMap client:visible />
+          <LeafletMap client:only="react" />
         </div>
       </div>
     </SectionReveal>

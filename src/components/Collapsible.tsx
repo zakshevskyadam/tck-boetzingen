@@ -31,8 +31,8 @@ export default function Collapsible({ title, children, defaultOpen = false }: Pr
         aria-expanded={open}
       >
         <span
-          className="text-lg font-normal"
-          style={{ fontFamily: '"Playfair Display", Georgia, serif', color: 'var(--color-mc-text)' }}
+          className="text-base font-medium tracking-wide"
+          style={{ fontFamily: 'Inter, system-ui, sans-serif', color: 'var(--color-mc-text)' }}
         >
           {title}
         </span>

@@ -36,7 +36,7 @@ const lang = Astro.params.lang as Lang;
         <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('contact.map.label', lang)}</div>
         <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('contact.map.title', lang)}</h2>
         <div class="mb-8 border border-mc-border overflow-hidden rounded">
-          <LeafletMap client:visible />
+          <LeafletMap client:only="react" />
         </div>
         <div class="text-sm leading-relaxed text-white/70">
           <p class="text-mc-text font-medium mb-1">Tennisclub Kaiserstuhl Bötzingen e.V.</p>

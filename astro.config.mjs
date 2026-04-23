@@ -2,14 +2,13 @@ import { defineConfig } from 'astro/config';
 import react from '@astrojs/react';
 import tailwindcss from '@tailwindcss/vite';
 import sitemap from '@astrojs/sitemap';
-import keystatic from '@keystatic/astro';
 import netlify from '@astrojs/netlify';
 
 export default defineConfig({
   site: 'https://www.tck-boetzingen.de',
   output: 'static',
   adapter: netlify(),
-  integrations: [react(), sitemap(), keystatic()],
+  integrations: [react(), sitemap()],
   vite: {
     plugins: [tailwindcss()],
   },
