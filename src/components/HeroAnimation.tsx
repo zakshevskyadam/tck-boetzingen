@@ -255,6 +255,7 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
         @media (max-width: 768px) {
           .hero-text-title { font-size: 48px; letter-spacing: 2px; }
           .hero-text-sub { font-size: 11px; letter-spacing: 4px; }
+          .hero-text-tagline { font-size: 10px; letter-spacing: 2px; padding: 0 16px; }
 
           /* Rotate court 90deg so it fits portrait screens */
           .hero-court {
