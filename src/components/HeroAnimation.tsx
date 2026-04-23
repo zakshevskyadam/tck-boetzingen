@@ -259,7 +259,7 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
 
           /* Rotate court 90deg so it fits portrait screens */
           .hero-court {
-            width: 75vh;
+            width: 77.25vh;
             max-width: none;
             transform: translate(-50%, -50%) rotate(90deg);
             animation: courtAppearMobile 1.5s ease 0.4s forwards;
