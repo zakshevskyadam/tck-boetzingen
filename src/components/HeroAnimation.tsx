@@ -256,9 +256,9 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
           .hero-text-title { font-size: 48px; letter-spacing: 2px; }
           .hero-text-sub { font-size: 11px; letter-spacing: 4px; }
 
-          /* Rotate court 90deg so it fits portrait screens — bigger now */
+          /* Rotate court 90deg so it fits portrait screens */
           .hero-court {
-            width: 90vh;
+            width: 75vh;
             max-width: none;
             transform: translate(-50%, -50%) rotate(90deg);
             animation: courtAppearMobile 1.5s ease 0.4s forwards;
@@ -268,22 +268,22 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
             100% { opacity: 1; transform: translate(-50%, -50%) rotate(90deg) scale(1); }
           }
 
-          /* Ball: side-to-side rally across the rotated court */
+          /* Ball: vertical rally up-down across the rotated court */
           .hero-ball {
             animation: snakePathMobile 2s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
           }
           @keyframes snakePathMobile {
-            0%   { left: -5%;  top: 50%;  opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            0%   { left: 50%;  top: -5%;  opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
             3%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
-            /* Bounce 1: → right side */
-            18%  { left: 82%;  top: 45%; transform: translate(-50%, -50%) scale(1.15, 0.85); }
-            20%  { left: 80%;  top: 47%; transform: translate(-50%, -50%) scale(0.9, 1.1); }
-            /* Bounce 2: → left side */
-            38%  { left: 18%;  top: 52%; transform: translate(-50%, -50%) scale(1.1, 0.9); }
-            40%  { left: 20%;  top: 50%; transform: translate(-50%, -50%) scale(0.9, 1.1); }
-            /* Bounce 3: → right side */
-            58%  { left: 82%;  top: 48%; transform: translate(-50%, -50%) scale(1.15, 0.85); }
-            60%  { left: 80%;  top: 50%; transform: translate(-50%, -50%) scale(0.9, 1.1); }
+            /* Bounce 1: → far baseline (bottom) */
+            18%  { left: 45%;  top: 80%; transform: translate(-50%, -50%) scale(0.85, 1.15); }
+            20%  { left: 47%;  top: 78%; transform: translate(-50%, -50%) scale(1.1, 0.9); }
+            /* Bounce 2: → near baseline (top) */
+            38%  { left: 52%;  top: 22%; transform: translate(-50%, -50%) scale(0.9, 1.1); }
+            40%  { left: 50%;  top: 24%; transform: translate(-50%, -50%) scale(1.1, 0.9); }
+            /* Bounce 3: → bottom again */
+            58%  { left: 48%;  top: 78%; transform: translate(-50%, -50%) scale(0.85, 1.15); }
+            60%  { left: 50%;  top: 76%; transform: translate(-50%, -50%) scale(1.1, 0.9); }
             /* Bounce 4: → center */
             78%  { left: 50%;  top: 50%; transform: translate(-50%, -50%) scale(1.2, 0.8); }
             82%  { left: 50%;  top: 50%; transform: translate(-50%, -50%) scale(0.95, 1.05); }
@@ -292,9 +292,9 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
           }
 
           /* Move impact flashes to mobile bounce points */
-          .hero-impact-1 { left: 82% !important; top: 45% !important; }
-          .hero-impact-2 { left: 18% !important; top: 52% !important; }
-          .hero-impact-3 { left: 82% !important; top: 48% !important; }
+          .hero-impact-1 { left: 45% !important; top: 80% !important; }
+          .hero-impact-2 { left: 52% !important; top: 22% !important; }
+          .hero-impact-3 { left: 48% !important; top: 78% !important; }
           .hero-impact-4 { left: 50% !important; top: 50% !important; }
         }
 
