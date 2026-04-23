@@ -255,6 +255,47 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
         @media (max-width: 768px) {
           .hero-text-title { font-size: 48px; letter-spacing: 2px; }
           .hero-text-sub { font-size: 11px; letter-spacing: 4px; }
+
+          /* Rotate court 90deg so it fits portrait screens */
+          .hero-court {
+            width: 70vh;
+            max-width: 90vw;
+            transform: translate(-50%, -50%) rotate(90deg);
+            animation: courtAppearMobile 1.5s ease 0.4s forwards;
+          }
+          @keyframes courtAppearMobile {
+            0%   { opacity: 0; transform: translate(-50%, -50%) rotate(90deg) scale(0.92); }
+            100% { opacity: 1; transform: translate(-50%, -50%) rotate(90deg) scale(1); }
+          }
+
+          /* Ball snake path for vertical court — bounces across portrait screen */
+          .hero-ball {
+            animation: snakePathMobile 2s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
+          }
+          @keyframes snakePathMobile {
+            0%   { left: 50%;  top: -5%;   opacity: 0; transform: translate(-50%, -50%) scale(0.5); }
+            3%   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+            /* Bounce 1: top-center → right side */
+            18%  { left: 75%;  top: 28%; transform: translate(-50%, -50%) scale(1.15, 0.85); }
+            20%  { left: 72%;  top: 30%; transform: translate(-50%, -50%) scale(0.9, 1.1); }
+            /* Bounce 2: → left side */
+            38%  { left: 25%;  top: 48%; transform: translate(-50%, -50%) scale(1.1, 0.9); }
+            40%  { left: 28%;  top: 50%; transform: translate(-50%, -50%) scale(0.9, 1.1); }
+            /* Bounce 3: → right side */
+            58%  { left: 75%;  top: 65%; transform: translate(-50%, -50%) scale(1.15, 0.85); }
+            60%  { left: 72%;  top: 67%; transform: translate(-50%, -50%) scale(0.9, 1.1); }
+            /* Bounce 4: → center */
+            78%  { left: 50%;  top: 50%; transform: translate(-50%, -50%) scale(1.2, 0.8); }
+            82%  { left: 50%;  top: 50%; transform: translate(-50%, -50%) scale(0.95, 1.05); }
+            90%  { left: 50%;  top: 50%; transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { left: 50%;  top: 50%; transform: translate(-50%, -50%) scale(0.6); opacity: 0; }
+          }
+
+          /* Move impact flashes to mobile bounce points */
+          .hero-impact-1 { left: 75% !important; top: 28% !important; }
+          .hero-impact-2 { left: 25% !important; top: 48% !important; }
+          .hero-impact-3 { left: 75% !important; top: 65% !important; }
+          .hero-impact-4 { left: 50% !important; top: 50% !important; }
         }
 
         /* ===== REDUCED MOTION ===== */
