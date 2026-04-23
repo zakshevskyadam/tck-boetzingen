@@ -57,7 +57,7 @@ function AccordionItem({
           {item.q}
         </span>
         <svg
-          className={`w-4 h-4 flex-shrink-0 text-white/30 transition-transform duration-300 ${
+          className={`w-4 h-4 flex-shrink-0 text-white/55 transition-transform duration-300 ${
             isOpen ? 'rotate-180' : ''
           }`}
           fill="none"
@@ -73,7 +73,7 @@ function AccordionItem({
         className="overflow-hidden transition-[max-height] duration-300 ease-in-out"
         style={{ maxHeight }}
       >
-        <p className="text-sm leading-relaxed text-white/40 pb-5 px-1">{item.a}</p>
+        <p className="text-sm leading-relaxed text-white/70 pb-5 px-1">{item.a}</p>
       </div>
     </div>
   );
@@ -106,7 +106,7 @@ export default function FaqAccordion({ categories }: Props) {
             className={`whitespace-nowrap px-4 py-2 text-xs tracking-[1px] uppercase transition-colors cursor-pointer ${
               i === activeCategory
                 ? 'text-mc-accent border-b-2 border-mc-accent'
-                : 'text-white/30 hover:text-white/50'
+                : 'text-white/55 hover:text-white/75'
             }`}
           >
             {cat.name}

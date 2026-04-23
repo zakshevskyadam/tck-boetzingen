@@ -59,7 +59,7 @@ function Counter({ value, label }: StatsItem) {
       <div className="font-heading text-5xl font-light text-mc-accent/70">
         {display}
       </div>
-      <div className="text-xs tracking-[2px] text-white/30 uppercase mt-1">
+      <div className="text-xs tracking-[2px] text-white/55 uppercase mt-1">
         {label}
       </div>
     </div>

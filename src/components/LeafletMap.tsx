@@ -8,15 +8,20 @@ export default function LeafletMap() {
     import('leaflet').then((L) => {
       import('leaflet/dist/leaflet.css');
       if (!mapRef.current) return;
+
+      const isDark = document.documentElement.getAttribute('data-theme') !== 'light';
+
+      const darkTiles = 'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png';
+      const lightTiles = 'https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png';
+
       map = L.map(mapRef.current).setView([48.0735, 7.723], 15);
-      L.tileLayer(
-        'https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',
-        {
-          attribution: '&copy; OpenStreetMap &copy; CARTO',
-        }
-      ).addTo(map);
+      L.tileLayer(isDark ? darkTiles : lightTiles, {
+        attribution: '&copy; OpenStreetMap &copy; CARTO',
+      }).addTo(map);
+
+      const markerColor = isDark ? '#c8ff00' : '#3d7a00';
       const icon = L.divIcon({
-        html: '<div style="width:14px;height:14px;background:#c8ff00;border-radius:50%;box-shadow:0 0 10px rgba(200,255,0,0.5)"></div>',
+        html: `<div style="width:14px;height:14px;background:${markerColor};border-radius:50%;box-shadow:0 0 10px ${markerColor}80"></div>`,
         className: '',
         iconSize: [14, 14],
       });

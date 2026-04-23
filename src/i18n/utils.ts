@@ -27,3 +27,32 @@ export function getLocalizedPath(dePath: string, lang: Lang): string {
   const slug = route[lang];
   return lang === DEFAULT_LANG ? slug : `/${lang}${slug}`;
 }
+
+/** Convert any localized URL path back to the DE (default) path */
+export function getDePath(pathname: string): string {
+  // Strip trailing slash (except root)
+  const clean = pathname === '/' ? '/' : pathname.replace(/\/$/, '');
+
+  // Check if path starts with a language prefix
+  const segments = clean.split('/').filter(Boolean);
+  const firstSeg = segments[0];
+  const langMatch = LANGUAGES.find(l => l.code === firstSeg && l.code !== DEFAULT_LANG);
+
+  if (!langMatch) {
+    // Already a DE path
+    return clean || '/';
+  }
+
+  // Remove language prefix to get the localized slug
+  const localizedSlug = '/' + segments.slice(1).join('/') || '/';
+
+  // Find which DE route maps to this localized slug for this language
+  for (const [dePath, routes] of Object.entries(ROUTE_MAP)) {
+    if (routes[langMatch.code] === localizedSlug) {
+      return dePath;
+    }
+  }
+
+  // Fallback: return the slug without prefix
+  return localizedSlug;
+}

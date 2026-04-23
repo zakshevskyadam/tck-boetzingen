@@ -10,9 +10,10 @@ interface Props {
   title: string;
   description: string;
   lang?: string;
+  fullScreen?: boolean;
 }
 
-const { title, description, lang = 'de' } = Astro.props;
+const { title, description, lang = 'de', fullScreen = false } = Astro.props;
 ---
 
 <html lang={lang}>
@@ -23,13 +24,15 @@ const { title, description, lang = 'de' } = Astro.props;
     </script>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <SEOHead title={title} description={description} lang={lang} />
+    <link rel="icon" type="image/png" href="/images/tck-icon.png" />
+    <link rel="apple-touch-icon" href="/images/tck-icon.png" />
     <link rel="preload" href="/fonts/inter-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="preload" href="/fonts/playfair-display-latin-400-normal.woff2" as="font" type="font/woff2" crossorigin />
   </head>
   <body class="bg-mc-bg text-mc-text-secondary font-body">
     <SkipToContent />
     <Nav lang={lang} />
-    <main id="main-content" class="pt-[72px]">
+    <main id="main-content" class={fullScreen ? '' : 'pt-[72px]'}>
       <slot />
     </main>
     <Footer lang={lang} />

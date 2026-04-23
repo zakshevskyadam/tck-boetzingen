@@ -15,5 +15,6 @@ export const ROUTE_MAP: Record<string, Record<Lang, string>> = {
   '/verein': { de: '/verein', en: '/club', fr: '/club', ru: '/club', uk: '/club', es: '/club' },
   '/tennishalle': { de: '/tennishalle', en: '/tennis-hall', fr: '/salle-de-tennis', ru: '/tennisnyj-zal', uk: '/tenisnyj-zal', es: '/sala-de-tenis' },
   '/mitgliedschaft': { de: '/mitgliedschaft', en: '/membership', fr: '/adhesion', ru: '/chlenstvo', uk: '/chlenstvo', es: '/membresia' },
+  '/termine': { de: '/termine', en: '/events', fr: '/evenements', ru: '/sobytija', uk: '/podiji', es: '/eventos' },
   '/kontakt': { de: '/kontakt', en: '/contact', fr: '/contact', ru: '/kontakt', uk: '/kontakt', es: '/contacto' },
 };

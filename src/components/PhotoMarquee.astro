@@ -1,0 +1,76 @@
+---
+interface Props {
+  images: { src: string; alt: string }[];
+  reverse?: boolean;
+  speed?: number;
+}
+
+const { images, reverse = false, speed = 40 } = Astro.props;
+// Duplicate for seamless loop
+const allImages = [...images, ...images];
+---
+
+<div class="marquee-container overflow-hidden py-4">
+  <div
+    class:list={["marquee-track flex gap-6", reverse ? "marquee-reverse" : "marquee-forward"]}
+    style={`--marquee-speed: ${speed}s;`}
+  >
+    {allImages.map((img, i) => (
+      <div
+        class="marquee-card flex-shrink-0 relative group"
+      >
+        <div class="w-[280px] h-[200px] md:w-[340px] md:h-[240px] overflow-hidden border border-mc-border rounded-sm transition-all duration-300 group-hover:border-mc-accent/40 group-hover:scale-[1.03]">
+          <img
+            src={img.src}
+            alt={img.alt}
+            class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
+            loading="lazy"
+          />
+        </div>
+        {img.alt && (
+          <div class="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/60 to-transparent px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300 rounded-b-sm">
+            <span class="text-xs text-white/90 tracking-wide">{img.alt}</span>
+          </div>
+        )}
+      </div>
+    ))}
+  </div>
+</div>
+
+<style>
+  .marquee-container {
+    mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(to right, transparent, black 5%, black 95%, transparent);
+  }
+
+  .marquee-forward {
+    animation: marqueeScroll var(--marquee-speed) linear infinite;
+  }
+
+  .marquee-reverse {
+    animation: marqueeScrollReverse var(--marquee-speed) linear infinite;
+  }
+
+  @keyframes marqueeScroll {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); }
+  }
+
+  @keyframes marqueeScrollReverse {
+    0% { transform: translateX(-50%); }
+    100% { transform: translateX(0); }
+  }
+
+  .marquee-container:hover .marquee-forward,
+  .marquee-container:hover .marquee-reverse {
+    animation-play-state: paused;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .marquee-forward,
+    .marquee-reverse {
+      animation: none;
+      overflow-x: auto;
+    }
+  }
+</style>

@@ -7,20 +7,25 @@ interface Props {
 }
 
 const { title, description, icon, href } = Astro.props;
+
+const inner = `
+  <div class="card-hover group relative overflow-hidden bg-white/[0.02] border border-mc-border p-7 transition-all duration-300 h-full flex flex-col">
+    <div class="w-10 h-10 rounded-lg bg-mc-accent/10 flex items-center justify-center mb-5 text-mc-accent/70 transition-colors group-hover:bg-mc-accent/20">
+      <span class="text-xl leading-none">${icon}</span>
+    </div>
+    <h3 class="font-heading text-lg font-normal text-mc-text mb-2">${title}</h3>
+    <p class="text-sm leading-relaxed text-white/70 flex-1">${description}</p>
+    ${href ? '<div class="mt-4 text-xs text-mc-accent/60 tracking-wide uppercase group-hover:text-mc-accent transition-colors">Mehr erfahren →</div>' : ''}
+  </div>
+`;
 ---
 
 {href ? (
-  <a href={href} class="block no-underline">
-    <div class="card-hover relative overflow-hidden bg-white/[0.02] border border-mc-border p-9 transition-all duration-400">
-      <span class="text-[28px] block mb-4 opacity-60">{icon}</span>
-      <h3 class="font-heading text-[22px] font-normal text-mc-text mb-3">{title}</h3>
-      <p class="text-sm leading-relaxed text-white/40">{description}</p>
-    </div>
-  </a>
+  href.startsWith('http') ? (
+    <a href={href} target="_blank" rel="noopener noreferrer" class="block no-underline h-full" set:html={inner} />
+  ) : (
+    <a href={href} class="block no-underline h-full" set:html={inner} />
+  )
 ) : (
-  <div class="card-hover relative overflow-hidden bg-white/[0.02] border border-mc-border p-9 transition-all duration-400">
-    <span class="text-[28px] block mb-4 opacity-60">{icon}</span>
-    <h3 class="font-heading text-[22px] font-normal text-mc-text mb-3">{title}</h3>
-    <p class="text-sm leading-relaxed text-white/40">{description}</p>
-  </div>
+  <div set:html={inner} class="h-full" />
 )}

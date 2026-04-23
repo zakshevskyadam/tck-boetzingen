@@ -1,0 +1,78 @@
+---
+import fs from 'node:fs';
+import path from 'node:path';
+import yaml from 'js-yaml';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import SectionReveal from '../../components/SectionReveal.astro';
+import EventCard from '../../components/EventCard.astro';
+import { t, type Lang } from '../../i18n/utils';
+
+export function getStaticPaths() {
+  return ['en', 'fr', 'ru', 'uk', 'es'].map(lang => ({ params: { lang } }));
+}
+
+const lang = Astro.params.lang as Lang;
+
+const eventsDir = path.resolve('src/content/events');
+const eventSlugs = fs.readdirSync(eventsDir).filter((f: string) => {
+  const stat = fs.statSync(path.join(eventsDir, f));
+  return stat.isDirectory();
+});
+
+interface EventData {
+  title: string;
+  date: string;
+  description: string;
+}
+
+const allEvents: EventData[] = eventSlugs
+  .map((slug: string) => {
+    const filePath = path.join(eventsDir, slug, 'index.yaml');
+    if (!fs.existsSync(filePath)) return null;
+    const raw = fs.readFileSync(filePath, 'utf-8');
+    return yaml.load(raw) as EventData;
+  })
+  .filter((e): e is EventData => e !== null)
+  .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+const upcoming = allEvents.filter((e) => new Date(e.date) >= new Date());
+const past = allEvents.filter((e) => new Date(e.date) < new Date());
+---
+
+<BaseLayout title={t('events.title', lang)} description={t('events.title', lang)} lang={lang}>
+
+  <section class="py-28 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('events.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('events.title', lang)}</h2>
+        {upcoming.length > 0 ? (
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {upcoming.map((event) => (
+              <EventCard title={event.title} date={event.date} description={event.description} />
+            ))}
+          </div>
+        ) : (
+          <p class="text-sm text-white/55">{t('events.empty', lang)}</p>
+        )}
+      </div>
+    </SectionReveal>
+  </section>
+
+  {past.length > 0 && (
+    <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
+      <SectionReveal>
+        <div class="max-w-4xl mx-auto">
+          <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">Archiv</div>
+          <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">Vergangene Veranstaltungen</h2>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6 opacity-60">
+            {past.map((event) => (
+              <EventCard title={event.title} date={event.date} description={event.description} />
+            ))}
+          </div>
+        </div>
+      </SectionReveal>
+    </section>
+  )}
+
+</BaseLayout>

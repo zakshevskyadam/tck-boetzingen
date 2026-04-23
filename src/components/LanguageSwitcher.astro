@@ -1,5 +1,5 @@
 ---
-import { LANGUAGES, getLocalizedPath, type Lang } from '../i18n/utils';
+import { LANGUAGES, getLocalizedPath, getDePath, type Lang } from '../i18n/utils';
 
 interface Props {
   lang: Lang;
@@ -8,6 +8,7 @@ interface Props {
 
 const { lang, currentPath } = Astro.props;
 const currentLang = LANGUAGES.find(l => l.code === lang)!;
+const dePath = getDePath(currentPath);
 ---
 
 <div class="lang-switcher relative" data-open="false">
@@ -25,7 +26,7 @@ const currentLang = LANGUAGES.find(l => l.code === lang)!;
   <div class="lang-dropdown absolute right-0 top-full mt-2 bg-mc-bg/95 backdrop-blur-md border border-mc-accent/10 rounded py-1 min-w-[120px] opacity-0 invisible translate-y-1 transition-all duration-200 z-50">
     {LANGUAGES.map((l) => {
       const isActive = l.code === lang;
-      const href = getLocalizedPath(currentPath, l.code);
+      const href = getLocalizedPath(dePath, l.code);
       return (
         <a
           href={href}
@@ -33,12 +34,12 @@ const currentLang = LANGUAGES.find(l => l.code === lang)!;
             'flex items-center gap-2 px-3 py-2 text-[12px] tracking-wide transition-colors',
             isActive
               ? 'text-mc-accent bg-mc-accent/5'
-              : 'text-white/40 hover:text-mc-accent/80 hover:bg-white/[0.03]',
+              : 'text-white/70 hover:text-mc-accent/80 hover:bg-white/[0.03]',
           ]}
           aria-current={isActive ? 'page' : undefined}
         >
           <span class="uppercase font-medium">{l.code.toUpperCase()}</span>
-          <span class="text-[11px] text-white/25">{l.name}</span>
+          <span class="text-[11px] text-white/50">{l.name}</span>
         </a>
       );
     })}
@@ -46,36 +47,57 @@ const currentLang = LANGUAGES.find(l => l.code === lang)!;
 </div>
 
 <script is:inline>
-document.querySelectorAll('.lang-switcher').forEach(switcher => {
-  const btn = switcher.querySelector('.lang-btn');
-  const dropdown = switcher.querySelector('.lang-dropdown');
-  const chevron = switcher.querySelector('.lang-chevron');
+(function() {
+  function initLangSwitchers() {
+    document.querySelectorAll('.lang-switcher').forEach(switcher => {
+      if (switcher._langInit) return;
+      switcher._langInit = true;
 
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    const isOpen = switcher.dataset.open === 'true';
-    switcher.dataset.open = isOpen ? 'false' : 'true';
-    btn.setAttribute('aria-expanded', !isOpen);
-    if (!isOpen) {
-      dropdown.style.opacity = '1';
-      dropdown.style.visibility = 'visible';
-      dropdown.style.transform = 'translateY(0)';
-      chevron.style.transform = 'rotate(180deg)';
-    } else {
-      dropdown.style.opacity = '0';
-      dropdown.style.visibility = 'hidden';
-      dropdown.style.transform = 'translateY(4px)';
-      chevron.style.transform = 'rotate(0)';
-    }
-  });
+      const btn = switcher.querySelector('.lang-btn');
+      const dropdown = switcher.querySelector('.lang-dropdown');
+      const chevron = switcher.querySelector('.lang-chevron');
+      if (!btn || !dropdown || !chevron) return;
 
-  document.addEventListener('click', () => {
-    switcher.dataset.open = 'false';
-    btn.setAttribute('aria-expanded', 'false');
-    dropdown.style.opacity = '0';
-    dropdown.style.visibility = 'hidden';
-    dropdown.style.transform = 'translateY(4px)';
-    chevron.style.transform = 'rotate(0)';
-  });
-});
+      function open() {
+        switcher.dataset.open = 'true';
+        btn.setAttribute('aria-expanded', 'true');
+        dropdown.style.opacity = '1';
+        dropdown.style.visibility = 'visible';
+        dropdown.style.transform = 'translateY(0)';
+        chevron.style.transform = 'rotate(180deg)';
+      }
+
+      function close() {
+        switcher.dataset.open = 'false';
+        btn.setAttribute('aria-expanded', 'false');
+        dropdown.style.opacity = '0';
+        dropdown.style.visibility = 'hidden';
+        dropdown.style.transform = 'translateY(4px)';
+        chevron.style.transform = 'rotate(0)';
+      }
+
+      btn.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        if (switcher.dataset.open === 'true') {
+          close();
+        } else {
+          open();
+        }
+      });
+
+      document.addEventListener('click', function(e) {
+        if (!switcher.contains(e.target)) {
+          close();
+        }
+      });
+    });
+  }
+
+  initLangSwitchers();
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initLangSwitchers);
+  }
+  document.addEventListener('astro:page-load', initLangSwitchers);
+})();
 </script>

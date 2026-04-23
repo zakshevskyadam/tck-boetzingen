@@ -29,6 +29,7 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
           z-index: 40;
           animation: snakePath 2s cubic-bezier(0.4, 0, 0.2, 1) 0.1s forwards;
           opacity: 0;
+          pointer-events: none;
         }
         .hero-ball-body {
           width: 100%; height: 100%;
@@ -95,16 +96,17 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
           animation: inherit;
           animation-delay: inherit;
         }
+        .hero-impact { transform: translate(-50%, -50%); }
         .hero-impact-1 { left: 75%; top: 68%; animation: impactBurst 0.5s ease 0.50s forwards; }
         .hero-impact-2 { left: 20%; top: 28%; animation: impactBurst 0.5s ease 0.90s forwards; }
         .hero-impact-3 { left: 72%; top: 70%; animation: impactBurst 0.5s ease 1.30s forwards; }
-        .hero-impact-4 { left: 50%; top: 50%; transform: translate(-50%, -50%); animation: impactBurst 0.6s ease 1.70s forwards; }
+        .hero-impact-4 { left: 50%; top: 50%; animation: impactBurst 0.6s ease 1.70s forwards; }
 
         @keyframes impactBurst {
           0%   { opacity: 1; width: 8px; height: 8px;
                  box-shadow: 0 0 20px rgba(200,255,0,0.8); }
           100% { opacity: 0; width: 80px; height: 80px;
-                 box-shadow: 0 0 0 rgba(200,255,0,0); margin-left: -36px; margin-top: -36px; }
+                 box-shadow: 0 0 0 rgba(200,255,0,0); }
         }
 
         /* ===== RIPPLE RINGS ===== */
@@ -114,6 +116,7 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
           border-radius: 50%;
           border: 1px solid rgba(200,255,0,0.25);
           opacity: 0; z-index: 34;
+          pointer-events: none;
         }
         .hero-fr1 { width: 10px; height: 10px; animation: rippleOut 1.2s ease 1.70s forwards; }
         .hero-fr2 { width: 10px; height: 10px; animation: rippleOut 1.2s ease 1.82s forwards; }
@@ -133,6 +136,7 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
           opacity: 0;
           z-index: 10;
           animation: courtAppear 1.5s ease 0.4s forwards;
+          pointer-events: none;
         }
         @keyframes courtAppear {
           0%   { opacity: 0; transform: translate(-50%, -50%) perspective(900px) rotateX(6deg) scale(0.95); }
@@ -151,8 +155,9 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
         }
         .hero-text-sub {
           font-family: 'Playfair Display', Georgia, serif;
-          font-size: 14px; letter-spacing: 6px; color: var(--color-mc-accent-muted);
+          font-size: 15px; letter-spacing: 6px; color: var(--color-mc-accent);
           text-transform: uppercase; margin-bottom: 16px;
+          font-weight: 400;
         }
         .hero-text-title {
           font-family: 'Playfair Display', Georgia, serif;
@@ -167,16 +172,16 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
         }
         @keyframes drawH { to { transform: scaleX(1); } }
         .hero-text-tagline {
-          font-size: 12px; color: rgba(255,255,255,0.4); letter-spacing: 3px;
+          font-size: 13px; color: rgba(255,255,255,0.65); letter-spacing: 3px;
           opacity: 0;
           animation: heroFadeIn 0.6s ease 2.9s forwards;
         }
         .hero-text-cta {
           display: inline-block; margin-top: 40px;
-          padding: 14px 36px;
-          border: 1px solid rgba(200,255,0,0.3);
-          color: rgba(200,255,0,0.8);
-          font-size: 12px; letter-spacing: 3px; text-transform: uppercase;
+          padding: 16px 40px;
+          border: 1px solid rgba(200,255,0,0.5);
+          color: #c8ff00;
+          font-size: 13px; font-weight: 500; letter-spacing: 3px; text-transform: uppercase;
           text-decoration: none;
           opacity: 0;
           animation: heroFadeIn 0.6s ease 3.1s forwards;
@@ -227,7 +232,7 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
           0%   { opacity: 1; width: 8px; height: 8px;
                  box-shadow: 0 0 20px rgba(90,138,0,0.8); }
           100% { opacity: 0; width: 80px; height: 80px;
-                 box-shadow: 0 0 0 rgba(90,138,0,0); margin-left: -36px; margin-top: -36px; }
+                 box-shadow: 0 0 0 rgba(90,138,0,0); }
         }
         @keyframes heroGentlePulseLight {
           0%, 100% { box-shadow: 0 0 20px rgba(90,138,0,0.3); }
@@ -310,7 +315,7 @@ export default function HeroAnimation({ texts }: { texts: HeroTexts }) {
           <h1 className="hero-text-title">{texts.title}</h1>
           <div className="hero-text-divider" />
           <div className="hero-text-tagline">{texts.tagline}</div>
-          <a href="#about" className="hero-text-cta">{texts.cta}</a>
+          <a href="/kontakt" className="hero-text-cta">{texts.cta}</a>
         </div>
 
         {/* Scroll hint */}

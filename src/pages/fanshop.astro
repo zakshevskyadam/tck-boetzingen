@@ -1,0 +1,44 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import SectionReveal from '../components/SectionReveal.astro';
+import { t, type Lang } from '../i18n/utils';
+
+const lang: Lang = 'de';
+---
+
+<BaseLayout title="Fanshop – TCK Bötzingen" description="Fanartikel des TCK Bötzingen e.V. — Vereinskleidung und Accessoires über unseren Partner Clubstylez.">
+
+  <section class="py-28 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-3xl mx-auto text-center">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">Fanshop</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">Der TCK Fanshop</h2>
+        <p class="text-sm leading-relaxed text-white/70 max-w-xl mx-auto mb-4">
+          Zeige die Verbundenheit zu Deinem Verein mit qualitativ hochwertigen und optisch auffälligen Fanartikeln!
+        </p>
+        <p class="text-sm leading-relaxed text-white/70 max-w-xl mx-auto mb-4">
+          Das Sortiment wechselt von Zeit zu Zeit und wird stetig erweitert. Regelmäßiges Vorbeischauen lohnt sich!
+        </p>
+        <p class="text-sm leading-relaxed text-white/70 max-w-xl mx-auto mb-10">
+          Es ist jederzeit möglich, Artikel ab Stückzahl eins zu kaufen — keine Sammelbestellungen notwendig. Die Abwicklung erfolgt komplett über unseren Partner <strong class="text-mc-text">Clubstylez</strong>. Mit dem Kauf unterstützt man dazu noch den Verein, da ein kleiner Teil des Umsatzes direkt an den TCK geht.
+        </p>
+
+        <div class="inline-flex flex-col sm:flex-row gap-4">
+          <a
+            href="https://tck-boetzingen.clubstylez.shop"
+            target="_blank"
+            rel="noopener noreferrer"
+            class="cta-sweep inline-block px-9 py-3.5 border border-mc-accent/30 text-mc-accent/80 text-xs tracking-[3px] uppercase transition-colors hover:bg-mc-accent/10"
+          >
+            Zum Fanshop &rarr;
+          </a>
+        </div>
+
+        <p class="text-xs text-white/45 mt-6">
+          Externer Link — Weiterleitung zu unserem Partner Clubstylez
+        </p>
+      </div>
+    </SectionReveal>
+  </section>
+
+</BaseLayout>

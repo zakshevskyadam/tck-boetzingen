@@ -12,8 +12,9 @@ const { lang, currentPath } = Astro.props;
 const navLinks = [
   { key: 'nav.home', path: '/' },
   { key: 'nav.verein', path: '/verein' },
-  { key: 'nav.tennishalle', path: '/tennishalle' },
-  { key: 'nav.mitgliedschaft', path: '/mitgliedschaft' },
+  { key: 'nav.termine', path: '/termine' },
+  { key: 'nav.buchung', path: 'https://buchung.tck-boetzingen.de', external: true },
+  { key: 'nav.fanshop', path: '/fanshop' },
   { key: 'nav.kontakt', path: '/kontakt' },
 ];
 ---
@@ -33,12 +34,23 @@ const navLinks = [
 
   <nav class="flex flex-col items-center gap-8" aria-label="Mobile navigation">
     {navLinks.map((link) => (
-      <a
-        href={getLocalizedPath(link.path, lang)}
-        class="text-white/70 text-2xl tracking-wide hover:text-mc-accent/80 transition-colors font-heading"
-      >
-        {t(link.key, lang)}
-      </a>
+      link.external ? (
+        <a
+          href={link.path}
+          target="_blank"
+          rel="noopener noreferrer"
+          class="text-white/70 text-2xl tracking-wide hover:text-mc-accent/80 transition-colors font-heading"
+        >
+          {t(link.key, lang)} &nearr;
+        </a>
+      ) : (
+        <a
+          href={getLocalizedPath(link.path, lang)}
+          class="text-white/70 text-2xl tracking-wide hover:text-mc-accent/80 transition-colors font-heading"
+        >
+          {t(link.key, lang)}
+        </a>
+      )
     ))}
   </nav>
 

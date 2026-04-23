@@ -57,13 +57,6 @@ const navLinks = [
     <div class="hidden md:flex items-center gap-3">
       <ThemeToggle />
       <LanguageSwitcher lang={lang} currentPath={Astro.url.pathname} />
-      <a
-        href="/login"
-        data-member-link
-        class="text-mc-text-muted text-[13px] tracking-wide hover:text-mc-accent transition-colors"
-      >
-        Login
-      </a>
       <div class="w-2.5 h-2.5 rounded-full bg-mc-accent gentlePulse"></div>
     </div>
 
@@ -115,21 +108,6 @@ const navLinks = [
     });
   }
 
-  function initMemberLink() {
-    const link = document.querySelector('[data-member-link]') as HTMLAnchorElement | null;
-    if (!link) return;
-    const hasSession = document.cookie.split(';').some(c => c.trim().startsWith('tck_logged_in='));
-    if (hasSession) {
-      link.textContent = 'Mein Bereich';
-      link.href = '/dashboard';
-    } else {
-      link.textContent = 'Login';
-      link.href = '/login';
-    }
-  }
-
   document.addEventListener('astro:page-load', initNav);
-  document.addEventListener('astro:page-load', initMemberLink);
   initNav();
-  initMemberLink();
 </script>

@@ -70,7 +70,7 @@ const clubInfo = yaml.load(fs.readFileSync(clubInfoPath, 'utf-8')) as {
       <div class="max-w-4xl mx-auto">
         <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('about.label', lang)}</div>
         <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">{t('about.title', lang)}</h2>
-        <p class="text-sm leading-relaxed text-white/40 max-w-2xl mb-12">{t('about.text', lang)}</p>
+        <p class="text-sm leading-relaxed text-white/70 max-w-2xl mb-12">{t('about.text', lang)}</p>
         <StatsCounter
           client:visible
           items={[
@@ -143,7 +143,7 @@ const clubInfo = yaml.load(fs.readFileSync(clubInfoPath, 'utf-8')) as {
             ))}
           </div>
         ) : (
-          <p class="text-sm text-white/40">Keine anstehenden Veranstaltungen.</p>
+          <p class="text-sm text-white/70">Keine anstehenden Veranstaltungen.</p>
         )}
       </div>
     </SectionReveal>
@@ -154,7 +154,7 @@ const clubInfo = yaml.load(fs.readFileSync(clubInfoPath, 'utf-8')) as {
     <SectionReveal>
       <div class="max-w-3xl mx-auto text-center">
         <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">{t('cta.title', lang)}</h2>
-        <p class="text-sm leading-relaxed text-white/40 mb-10 max-w-xl mx-auto">{t('cta.text', lang)}</p>
+        <p class="text-sm leading-relaxed text-white/70 mb-10 max-w-xl mx-auto">{t('cta.text', lang)}</p>
         <a
           href={`/${lang}/membership`}
           class="cta-sweep inline-block px-9 py-3.5 border border-mc-accent/30 text-mc-accent/80 text-xs tracking-[3px] uppercase transition-colors hover:bg-mc-accent/10"
