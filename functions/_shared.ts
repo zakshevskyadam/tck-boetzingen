@@ -151,3 +151,96 @@ export function slugify(text: string): string {
 export function yamlEscape(s: string): string {
   return '"' + s.replace(/\\/g, '\\\\').replace(/"/g, '\\"').replace(/\n/g, '\\n') + '"';
 }
+
+// Fetch list of files in a directory (and their content) from GitHub
+export async function listEvents(env: Env): Promise<Array<{ slug: string; title: string; date: string; description: string; sha: string }>> {
+  const repo = env.GITHUB_REPO || 'zakshevskyadam/tck-boetzingen';
+  const token = env.GITHUB_TOKEN;
+  if (!token) throw new Error('GITHUB_TOKEN env variable not set');
+
+  const url = `https://api.github.com/repos/${repo}/contents/src/content/events?ref=main`;
+  const res = await fetch(url, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'User-Agent': 'tck-boetzingen-admin',
+    },
+  });
+  if (!res.ok) {
+    if (res.status === 404) return [];
+    throw new Error(`GitHub list error (${res.status}): ${await res.text()}`);
+  }
+  const dirs = (await res.json()) as Array<{ name: string; type: string }>;
+  const folders = dirs.filter((d) => d.type === 'dir');
+
+  const events = await Promise.all(
+    folders.map(async (folder) => {
+      const fileUrl = `https://api.github.com/repos/${repo}/contents/src/content/events/${folder.name}/index.yaml?ref=main`;
+      const fileRes = await fetch(fileUrl, {
+        headers: {
+          Authorization: `Bearer ${token}`,
+          Accept: 'application/vnd.github+json',
+          'User-Agent': 'tck-boetzingen-admin',
+        },
+      });
+      if (!fileRes.ok) return null;
+      const data = (await fileRes.json()) as { sha: string; content: string };
+      const yamlText = atob(data.content.replace(/\n/g, ''));
+      const parsed = parseSimpleYaml(yamlText);
+      return {
+        slug: folder.name,
+        title: parsed.title || '',
+        date: parsed.date || '',
+        description: parsed.description || '',
+        sha: data.sha,
+      };
+    }),
+  );
+  return events.filter((e): e is NonNullable<typeof e> => e !== null);
+}
+
+// Minimal YAML parser for our simple { title, date, description } format
+function parseSimpleYaml(text: string): Record<string, string> {
+  const result: Record<string, string> = {};
+  const lines = text.split('\n');
+  for (const line of lines) {
+    const m = line.match(/^([a-zA-Z_]+):\s*(.*)$/);
+    if (m) {
+      let val = m[2].trim();
+      // Strip quotes
+      if (val.startsWith('"') && val.endsWith('"')) {
+        val = val.slice(1, -1).replace(/\\"/g, '"').replace(/\\n/g, '\n').replace(/\\\\/g, '\\');
+      }
+      result[m[1]] = val;
+    }
+  }
+  return result;
+}
+
+// Delete a file (and the parent directory if empty)
+export async function deleteFile(opts: {
+  path: string;
+  sha: string;
+  message: string;
+  env: Env;
+  branch?: string;
+}): Promise<void> {
+  const { path, sha, message, env, branch = 'main' } = opts;
+  const repo = env.GITHUB_REPO || 'zakshevskyadam/tck-boetzingen';
+  const token = env.GITHUB_TOKEN;
+
+  const url = `https://api.github.com/repos/${repo}/contents/${path}`;
+  const res = await fetch(url, {
+    method: 'DELETE',
+    headers: {
+      Authorization: `Bearer ${token}`,
+      Accept: 'application/vnd.github+json',
+      'Content-Type': 'application/json',
+      'User-Agent': 'tck-boetzingen-admin',
+    },
+    body: JSON.stringify({ message, sha, branch }),
+  });
+  if (!res.ok) {
+    throw new Error(`GitHub delete error (${res.status}): ${await res.text()}`);
+  }
+}

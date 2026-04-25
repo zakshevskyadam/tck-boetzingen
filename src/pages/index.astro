@@ -6,17 +6,23 @@ import StatsCounter from '../components/StatsCounter';
 import Card from '../components/Card.astro';
 import EventCard from '../components/EventCard.astro';
 import { t, type Lang } from '../i18n/utils';
-import { getEvents, getNews, getClubInfo } from '../lib/content';
+import { getEvents, getClubInfo } from '../lib/content';
 
 const lang: Lang = 'de';
 
-const news = getNews()
-  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
-  .slice(0, 3);
-
-const events = getEvents()
-  .filter((e) => new Date(e.date) >= new Date())
+const now = Date.now();
+// Show all events: upcoming first (sorted asc), then past (sorted desc), max 6
+const allEvents = getEvents().map(e => ({
+  ...e,
+  isPast: new Date(e.date).getTime() < now,
+}));
+const upcoming = allEvents
+  .filter(e => !e.isPast)
   .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+const past = allEvents
+  .filter(e => e.isPast)
+  .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+const events = [...upcoming, ...past].slice(0, 6);
 
 const clubInfo = getClubInfo();
 ---
@@ -106,31 +112,6 @@ const clubInfo = getClubInfo();
     </SectionReveal>
   </section>
 
-  <!-- News -->
-  <section class="py-28 px-6 md:px-12">
-    <SectionReveal>
-      <div class="max-w-5xl mx-auto">
-        <div class="flex items-end justify-between mb-10">
-          <div>
-            <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">Neuigkeiten</div>
-            <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide">Aktuelles aus dem Verein</h2>
-          </div>
-        </div>
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-          {news.map((item) => (
-            <article class="bg-white/[0.02] border border-mc-border p-6 hover:border-mc-accent/20 transition-colors">
-              <time class="text-[11px] tracking-[2px] text-mc-accent/60 uppercase block mb-3">
-                {new Date(item.date).toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' })}
-              </time>
-              <h3 class="font-heading text-lg text-mc-text mb-3 leading-tight">{item.title}</h3>
-              <p class="text-sm leading-relaxed text-white/70">{item.excerpt}</p>
-            </article>
-          ))}
-        </div>
-      </div>
-    </SectionReveal>
-  </section>
-
   <!-- Termine -->
   <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
     <SectionReveal>
@@ -140,11 +121,18 @@ const clubInfo = getClubInfo();
         {events.length > 0 ? (
           <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             {events.map((event) => (
-              <EventCard title={event.title} date={event.date} description={event.description} />
+              <div class:list={["relative", event.isPast && "opacity-60"]}>
+                {event.isPast && (
+                  <span class="absolute top-3 right-3 z-10 text-[10px] tracking-[2px] uppercase px-2 py-1 bg-white/10 border border-white/20 text-white/70">
+                    Vorbei
+                  </span>
+                )}
+                <EventCard title={event.title} date={event.date} description={event.description} />
+              </div>
             ))}
           </div>
         ) : (
-          <p class="text-sm text-white/70">Keine anstehenden Veranstaltungen.</p>
+          <p class="text-sm text-white/70">Keine Veranstaltungen.</p>
         )}
       </div>
     </SectionReveal>

@@ -15,35 +15,27 @@ export const onRequestPost: PagesFunction<Env> = async ({ request, env }) => {
 
   try {
     const formData = await request.formData();
-    const type = (formData.get('type') as string) || '';
     const title = ((formData.get('title') as string) || '').trim();
     const date = (formData.get('date') as string) || '';
     const description = ((formData.get('description') as string) || '').trim();
 
-    if (!type || !title || !date || !description) {
+    if (!title || !date || !description) {
       return redirect('/admin?error=missing_fields');
     }
-    if (type !== 'event' && type !== 'news') {
-      return redirect('/admin?error=invalid_type');
-    }
 
-    const folder = type === 'event' ? 'events' : 'news';
     const slug = slugify(title) + '-' + Date.now();
-    const filePath = `src/content/${folder}/${slug}/index.yaml`;
+    const filePath = `src/content/events/${slug}/index.yaml`;
 
-    const yaml =
-      type === 'event'
-        ? `title: ${yamlEscape(title)}\ndate: "${date}"\ndescription: ${yamlEscape(description)}\n`
-        : `title: ${yamlEscape(title)}\ndate: "${date}"\nexcerpt: ${yamlEscape(description)}\n`;
+    const yaml = `title: ${yamlEscape(title)}\ndate: "${date}"\ndescription: ${yamlEscape(description)}\n`;
 
     await commitFile({
       path: filePath,
       content: yaml,
-      message: `content: add ${type} "${title}"`,
+      message: `content: add event "${title}"`,
       env,
     });
 
-    return redirect(`/admin?success=${type}`);
+    return redirect('/admin?success=created');
   } catch (err) {
     console.error('[admin/content] Error:', err);
     const msg = err instanceof Error ? err.message : 'unknown';

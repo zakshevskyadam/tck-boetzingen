@@ -1,74 +1,145 @@
 import {
   verifySessionToken,
   getSessionFromRequest,
+  listEvents,
   type Env,
 } from '../_shared';
+
+function formatDate(iso: string): string {
+  if (!iso) return '';
+  const d = new Date(iso);
+  if (isNaN(d.getTime())) return iso;
+  return d.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+}
+
+function escapeHtml(s: string): string {
+  return s
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+}
+
+interface Event {
+  slug: string;
+  title: string;
+  date: string;
+  description: string;
+  sha: string;
+}
+
+function renderEventList(events: Event[]): string {
+  if (events.length === 0) {
+    return '<p class="muted">Noch keine Veranstaltungen. Fügen Sie unten eine neue hinzu.</p>';
+  }
+  const now = Date.now();
+  const sorted = [...events].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+  const upcoming = sorted.filter((e) => new Date(e.date).getTime() >= now);
+  const past = sorted.filter((e) => new Date(e.date).getTime() < now).reverse();
+
+  const renderItem = (e: Event, isPast: boolean) => `
+    <div class="event-row${isPast ? ' past' : ''}">
+      <div class="event-info">
+        <div class="event-date">${escapeHtml(formatDate(e.date))}${isPast ? ' <span class="badge">Vorbei</span>' : ''}</div>
+        <div class="event-title">${escapeHtml(e.title)}</div>
+        <div class="event-desc">${escapeHtml(e.description)}</div>
+      </div>
+      <form method="POST" action="/api/admin/delete" class="delete-form" onsubmit="return confirm('Veranstaltung &quot;${escapeHtml(e.title).replace(/"/g, '&quot;')}&quot; wirklich löschen?')">
+        <input type="hidden" name="slug" value="${escapeHtml(e.slug)}" />
+        <input type="hidden" name="sha" value="${escapeHtml(e.sha)}" />
+        <button type="submit" class="delete-btn" title="Löschen">✕</button>
+      </form>
+    </div>
+  `;
+
+  return `
+    ${upcoming.length > 0 ? `
+      <h3 class="section-title">Anstehende Veranstaltungen (${upcoming.length})</h3>
+      <div class="event-list">${upcoming.map((e) => renderItem(e, false)).join('')}</div>
+    ` : ''}
+    ${past.length > 0 ? `
+      <h3 class="section-title past-title">Vergangene Veranstaltungen (${past.length})</h3>
+      <div class="event-list">${past.map((e) => renderItem(e, true)).join('')}</div>
+    ` : ''}
+  `;
+}
 
 function renderHtml(opts: {
   isAuthenticated: boolean;
   error: string | null;
   success: string | null;
   today: string;
+  eventsHtml: string;
 }): string {
-  const { isAuthenticated, error, success, today } = opts;
+  const { isAuthenticated, error, success, today, eventsHtml } = opts;
 
   const errorHtml =
-    error === 'invalid'
-      ? '<div class="alert alert-error">Falsches Passwort.</div>'
-      : error === 'unauthorized'
-        ? '<div class="alert alert-error">Bitte erst einloggen.</div>'
-        : error === 'missing_fields'
-          ? '<div class="alert alert-error">Bitte alle Felder ausfüllen.</div>'
-          : error
-            ? `<div class="alert alert-error">Fehler: ${decodeURIComponent(error)}</div>`
-            : '';
+    error === 'invalid' ? '<div class="alert alert-error">Falsches Passwort.</div>' :
+    error === 'unauthorized' ? '<div class="alert alert-error">Bitte erst einloggen.</div>' :
+    error === 'missing_fields' ? '<div class="alert alert-error">Bitte alle Felder ausfüllen.</div>' :
+    error ? `<div class="alert alert-error">Fehler: ${escapeHtml(decodeURIComponent(error))}</div>` : '';
 
   const successHtml =
-    success === 'event'
-      ? '<div class="alert alert-success">✓ Veranstaltung gespeichert! Die Seite wird in ~1 Minute aktualisiert.</div>'
-      : success === 'news'
-        ? '<div class="alert alert-success">✓ Neuigkeit gespeichert! Die Seite wird in ~1 Minute aktualisiert.</div>'
-        : '';
+    success === 'created' ? '<div class="alert alert-success">✓ Veranstaltung gespeichert! Die Seite wird in ~1 Minute aktualisiert.</div>' :
+    success === 'deleted' ? '<div class="alert alert-success">✓ Veranstaltung gelöscht.</div>' : '';
 
   const body = isAuthenticated
     ? `
         <div class="nav-actions">
           <a href="/">&larr; Zurück zur Website</a>
-          <form method="POST" action="/api/admin/logout" style="display:inline; background:none; border:none; padding:0; margin:0; float:right;">
+          <form method="POST" action="/api/admin/logout" class="logout-form">
             <button type="submit" class="logout">Abmelden</button>
           </form>
         </div>
 
-        <h2>Inhalte verwalten</h2>
-        <p class="subtitle">Fügen Sie Neuigkeiten oder Veranstaltungen hinzu. Änderungen erscheinen in ~1 Minute auf der Website.</p>
+        <h2>Veranstaltungen verwalten</h2>
+        <p class="subtitle">Übersicht aller Veranstaltungen. Änderungen erscheinen in ~1-2 Minuten auf der Website.</p>
 
-        <form method="POST" action="/api/admin/content">
-          <input type="hidden" name="type" value="news" />
-          <h3>📰 Neue Neuigkeit</h3>
-          <label for="news-title">Titel</label>
-          <input type="text" id="news-title" name="title" required />
-          <label for="news-date">Datum</label>
-          <input type="date" id="news-date" name="date" value="${today}" required />
-          <label for="news-desc">Kurzbeschreibung</label>
-          <textarea id="news-desc" name="description" rows="4" required></textarea>
-          <button type="submit">Neuigkeit veröffentlichen</button>
-        </form>
+        ${eventsHtml}
 
-        <form method="POST" action="/api/admin/content">
-          <input type="hidden" name="type" value="event" />
-          <h3>📅 Neue Veranstaltung</h3>
-          <label for="event-title">Titel</label>
-          <input type="text" id="event-title" name="title" required />
-          <label for="event-date">Datum</label>
-          <input type="date" id="event-date" name="date" required />
-          <label for="event-desc">Beschreibung</label>
-          <textarea id="event-desc" name="description" rows="4" required></textarea>
-          <button type="submit">Veranstaltung veröffentlichen</button>
-        </form>
+        <hr class="divider" />
+
+        <h2 class="add-title">📅 Neue Veranstaltung hinzufügen</h2>
+
+        <div class="grid">
+          <form method="POST" action="/api/admin/content" id="event-form">
+            <label for="event-title">Titel</label>
+            <input type="text" id="event-title" name="title" required oninput="updatePreview()" />
+            <label for="event-date">Datum</label>
+            <input type="date" id="event-date" name="date" value="${today}" required oninput="updatePreview()" />
+            <label for="event-desc">Beschreibung</label>
+            <textarea id="event-desc" name="description" rows="5" required oninput="updatePreview()"></textarea>
+            <button type="submit">Veröffentlichen</button>
+          </form>
+
+          <div class="preview">
+            <div class="preview-label">Vorschau</div>
+            <div class="event-card-preview" id="preview-card">
+              <time class="preview-date" id="preview-date">${today}</time>
+              <h4 class="preview-title" id="preview-title">Ihr Veranstaltungstitel</h4>
+              <p class="preview-desc" id="preview-desc">Die Beschreibung erscheint hier während der Eingabe.</p>
+            </div>
+          </div>
+        </div>
+
+        <script>
+          function updatePreview() {
+            const title = document.getElementById('event-title').value || 'Ihr Veranstaltungstitel';
+            const dateStr = document.getElementById('event-date').value;
+            const desc = document.getElementById('event-desc').value || 'Die Beschreibung erscheint hier während der Eingabe.';
+            document.getElementById('preview-title').textContent = title;
+            document.getElementById('preview-desc').textContent = desc;
+            if (dateStr) {
+              const d = new Date(dateStr);
+              document.getElementById('preview-date').textContent = d.toLocaleDateString('de-DE', { day: '2-digit', month: 'long', year: 'numeric' });
+            }
+          }
+        </script>
       `
     : `
         <h2>Anmeldung</h2>
-        <p class="subtitle">Geben Sie das Admin-Passwort ein, um Inhalte zu bearbeiten.</p>
+        <p class="subtitle">Geben Sie das Admin-Passwort ein, um Veranstaltungen zu verwalten.</p>
         <form method="POST" action="/api/admin/login">
           <label for="password">Passwort</label>
           <input type="password" id="password" name="password" required autofocus />
@@ -84,32 +155,66 @@ function renderHtml(opts: {
 <title>Admin — TCK Bötzingen</title>
 <link rel="icon" type="image/png" href="/images/tck-icon.png" />
 <style>
-  :root { --bg:#0d1117; --bg-alt:#161b22; --accent:#c8ff00; --text:#f0f0f0; --text-muted:rgba(255,255,255,0.6); --border:rgba(200,255,0,0.1); --error:#ff6b6b; --success:#4ade80; }
+  :root { --bg:#0d1117; --bg-alt:#161b22; --accent:#c8ff00; --text:#f0f0f0; --text-muted:rgba(255,255,255,0.6); --border:rgba(200,255,0,0.1); --error:#ff6b6b; --success:#4ade80; --danger:#ff6b6b; }
   * { box-sizing: border-box; margin: 0; padding: 0; }
   body { background:var(--bg); color:var(--text); font-family:Inter,system-ui,sans-serif; min-height:100vh; padding:40px 20px; }
-  .container { max-width:640px; margin:0 auto; }
+  .container { max-width:900px; margin:0 auto; }
   .brand { display:flex; align-items:center; gap:12px; margin-bottom:40px; padding-bottom:20px; border-bottom:1px solid var(--border); }
   .brand img { width:40px; height:40px; border-radius:50%; }
   .brand h1 { font-family:'Playfair Display',Georgia,serif; font-size:20px; font-weight:400; }
   .brand .label { font-size:11px; color:var(--accent); letter-spacing:4px; text-transform:uppercase; margin-left:auto; }
   h2 { font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:300; margin-bottom:8px; }
+  h2.add-title { font-size:24px; margin-top:0; }
   .subtitle { color:var(--text-muted); font-size:14px; margin-bottom:32px; }
+  .muted { color:var(--text-muted); font-size:14px; padding:24px; text-align:center; background:rgba(255,255,255,0.02); border:1px dashed var(--border); border-radius:4px; margin-bottom:24px; }
   .alert { padding:12px 16px; border-radius:4px; margin-bottom:24px; font-size:14px; }
   .alert-error { background:rgba(255,107,107,0.1); border:1px solid rgba(255,107,107,0.3); color:var(--error); }
   .alert-success { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:var(--success); }
-  form { background:rgba(255,255,255,0.02); border:1px solid var(--border); padding:32px; border-radius:4px; margin-bottom:24px; }
-  form h3 { font-family:'Playfair Display',Georgia,serif; font-size:20px; font-weight:400; margin-bottom:20px; }
+
+  .section-title { font-family:'Playfair Display',Georgia,serif; font-size:18px; font-weight:400; margin:24px 0 12px; color:var(--text); }
+  .past-title { color:var(--text-muted); margin-top:32px; }
+
+  .event-list { display:flex; flex-direction:column; gap:12px; margin-bottom:24px; }
+  .event-row { display:flex; gap:16px; align-items:flex-start; padding:16px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-radius:4px; }
+  .event-row.past { opacity:0.6; }
+  .event-info { flex:1; min-width:0; }
+  .event-date { font-size:11px; color:var(--accent); letter-spacing:1px; text-transform:uppercase; margin-bottom:4px; }
+  .event-row.past .event-date { color:var(--text-muted); }
+  .badge { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); padding:2px 6px; font-size:9px; letter-spacing:1px; margin-left:6px; color:rgba(255,255,255,0.7); }
+  .event-title { font-family:'Playfair Display',Georgia,serif; font-size:16px; margin-bottom:4px; color:var(--text); }
+  .event-desc { font-size:13px; color:var(--text-muted); line-height:1.5; }
+  .delete-form { margin:0; background:none; border:none; padding:0; }
+  .delete-btn { background:transparent; border:1px solid rgba(255,107,107,0.3); color:var(--danger); width:32px; height:32px; padding:0; font-size:14px; cursor:pointer; line-height:1; transition:all 0.2s; margin:0; letter-spacing:0; }
+  .delete-btn:hover { background:rgba(255,107,107,0.1); border-color:var(--danger); }
+
+  .divider { border:none; border-top:1px solid var(--border); margin:40px 0; }
+
+  form#event-form, form:not(.delete-form):not(.logout-form) { background:rgba(255,255,255,0.02); border:1px solid var(--border); padding:24px; border-radius:4px; margin-bottom:24px; }
+
   label { display:block; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; margin-top:16px; }
   label:first-of-type { margin-top:0; }
-  input,textarea,select { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text); padding:12px 14px; font-size:14px; font-family:inherit; border-radius:2px; }
+  input,textarea,select { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text); padding:10px 12px; font-size:14px; font-family:inherit; border-radius:2px; }
   input:focus,textarea:focus,select:focus { outline:none; border-color:rgba(200,255,0,0.4); }
-  textarea { resize:vertical; min-height:80px; }
-  button { background:transparent; border:1px solid rgba(200,255,0,0.4); color:var(--accent); padding:12px 28px; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; font-family:inherit; margin-top:20px; }
-  button:hover { background:rgba(200,255,0,0.08); border-color:var(--accent); }
-  .logout { float:right; margin:0; padding:6px 14px; font-size:10px; }
+  textarea { resize:vertical; min-height:90px; }
+  button[type="submit"] { background:transparent; border:1px solid rgba(200,255,0,0.4); color:var(--accent); padding:10px 24px; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; font-family:inherit; margin-top:20px; }
+  button[type="submit"]:hover { background:rgba(200,255,0,0.08); border-color:var(--accent); }
+  .logout-form { display:inline; background:none; border:none; padding:0; margin:0; float:right; }
+  .logout { float:none; margin:0; padding:6px 14px; font-size:10px; }
   .nav-actions { margin-bottom:24px; overflow:auto; }
   .nav-actions a { color:var(--text-muted); font-size:12px; text-decoration:none; transition:color 0.2s; }
   .nav-actions a:hover { color:var(--accent); }
+
+  /* Grid for form + preview */
+  .grid { display:grid; grid-template-columns: 1fr 1fr; gap:24px; margin-bottom:24px; }
+  @media (max-width: 720px) { .grid { grid-template-columns: 1fr; } }
+
+  .preview { padding:24px; border:1px dashed var(--border); border-radius:4px; }
+  .preview-label { font-size:10px; letter-spacing:3px; text-transform:uppercase; color:var(--accent); margin-bottom:16px; }
+  .event-card-preview { padding:16px; background:rgba(255,255,255,0.02); border:1px solid var(--border); border-left:3px solid var(--accent); border-radius:2px; }
+  .preview-date { display:block; font-size:11px; color:var(--accent); letter-spacing:1px; text-transform:uppercase; margin-bottom:8px; }
+  .preview-title { font-family:'Playfair Display',Georgia,serif; font-size:18px; font-weight:400; margin-bottom:6px; color:var(--text); }
+  .preview-desc { font-size:13px; color:var(--text-muted); line-height:1.5; white-space:pre-wrap; }
+
   footer { margin-top:40px; padding-top:20px; border-top:1px solid var(--border); color:var(--text-muted); font-size:12px; text-align:center; }
 </style>
 </head>
@@ -138,7 +243,18 @@ export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
   const success = url.searchParams.get('success');
   const today = new Date().toISOString().split('T')[0];
 
-  const html = renderHtml({ isAuthenticated, error, success, today });
+  let eventsHtml = '';
+  if (isAuthenticated) {
+    try {
+      const events = await listEvents(env);
+      eventsHtml = renderEventList(events);
+    } catch (err) {
+      console.error('[admin] Error listing events:', err);
+      eventsHtml = `<div class="alert alert-error">Fehler beim Laden der Veranstaltungen: ${err instanceof Error ? err.message : 'unknown'}</div>`;
+    }
+  }
+
+  const html = renderHtml({ isAuthenticated, error, success, today, eventsHtml });
   return new Response(html, {
     headers: {
       'Content-Type': 'text/html; charset=utf-8',

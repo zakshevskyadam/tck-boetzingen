@@ -2,7 +2,6 @@
 // Files are bundled at build time, works in any runtime including Cloudflare Workers.
 
 interface EventData { title: string; date: string; description: string; }
-interface NewsData { title: string; date: string; excerpt: string; }
 interface BoardMember { name: string; role: string; email: string; responsibilities: string; sortOrder: number; }
 interface TeamData { name: string; league: string; season: string; trainingDay?: string; }
 interface FaqData { question: string; answer: string; category: string; sortOrder: number; }
@@ -15,11 +14,6 @@ function valuesOf<T>(modules: Record<string, T>): T[] {
 
 export function getEvents(): EventData[] {
   const modules = import.meta.glob('../content/events/*/index.yaml', { eager: true, import: 'default' }) as Record<string, EventData>;
-  return valuesOf(modules);
-}
-
-export function getNews(): NewsData[] {
-  const modules = import.meta.glob('../content/news/*/index.yaml', { eager: true, import: 'default' }) as Record<string, NewsData>;
   return valuesOf(modules);
 }
 
