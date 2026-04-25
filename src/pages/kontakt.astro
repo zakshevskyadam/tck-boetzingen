@@ -12,6 +12,7 @@ import { getBoardMembers } from '../lib/content';
 const lang: Lang = 'de';
 
 const boardMembers = getBoardMembers();
+const sent = Astro.url.searchParams.get('sent') === '1';
 ---
 
 <BaseLayout title="Kontakt – TCK Bötzingen" description="Kontakt, Anfahrt und Ansprechpartner des TCK Bötzingen e.V.">
@@ -37,6 +38,13 @@ const boardMembers = getBoardMembers();
             <p class="text-sm text-mc-text">Waldstraße 5, 79268 Bötzingen</p>
           </div>
         </div>
+
+        {sent && (
+          <div class="mb-8 p-5 border border-mc-accent/40 bg-mc-accent/10 text-mc-text">
+            <p class="font-medium text-mc-text mb-1">✓ Vielen Dank!</p>
+            <p class="text-sm text-white/75">Ihre Nachricht wurde gesendet. Wir melden uns zeitnah bei Ihnen.</p>
+          </div>
+        )}
 
         <ContactForm />
       </div>

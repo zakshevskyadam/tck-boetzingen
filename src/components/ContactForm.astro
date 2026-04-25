@@ -5,14 +5,15 @@ const checkboxLabelClass = 'flex items-start gap-3 cursor-pointer text-sm text-w
 ---
 
 <form
-  name="contact"
+  action="https://api.web3forms.com/submit"
   method="POST"
-  data-netlify="true"
-  netlify-honeypot="bot-field"
   class="max-w-2xl"
 >
-  <input type="hidden" name="form-name" value="contact" />
-  <p class="hidden"><input name="bot-field" /></p>
+  <input type="hidden" name="access_key" value="00625cd1-a525-4660-883e-277a87829849" />
+  <input type="hidden" name="subject" value="Neue Nachricht über das Kontaktformular — TCK Bötzingen" />
+  <input type="hidden" name="from_name" value="TCK Bötzingen Website" />
+  <input type="hidden" name="redirect" value="https://tck-boetzingen.pages.dev/kontakt?sent=1" />
+  <input type="checkbox" name="botcheck" style="display:none" tabindex="-1" autocomplete="off" />
 
   <div class="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6">
     <div>
@@ -32,7 +33,7 @@ const checkboxLabelClass = 'flex items-start gap-3 cursor-pointer text-sm text-w
 
   <div class="mb-8">
     <label for="cf-nachricht" class={labelClass}>Nachricht</label>
-    <textarea id="cf-nachricht" name="nachricht" rows="5" required class={inputClass}></textarea>
+    <textarea id="cf-nachricht" name="message" rows="5" required class={inputClass}></textarea>
   </div>
 
   <div class="mb-8">
