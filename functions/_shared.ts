@@ -185,7 +185,10 @@ export async function listEvents(env: Env): Promise<Array<{ slug: string; title:
       });
       if (!fileRes.ok) return null;
       const data = (await fileRes.json()) as { sha: string; content: string };
-      const yamlText = atob(data.content.replace(/\n/g, ''));
+      // Properly decode base64 → UTF-8 (atob alone gives Latin-1 string)
+      const binary = atob(data.content.replace(/\s/g, ''));
+      const bytes = Uint8Array.from(binary, (c) => c.charCodeAt(0));
+      const yamlText = new TextDecoder('utf-8').decode(bytes);
       const parsed = parseSimpleYaml(yamlText);
       return {
         slug: folder.name,
