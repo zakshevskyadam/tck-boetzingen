@@ -1,7 +1,4 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
-import yaml from 'js-yaml';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import HeroAnimation from '../components/HeroAnimation';
 import SectionReveal from '../components/SectionReveal.astro';
@@ -9,60 +6,19 @@ import StatsCounter from '../components/StatsCounter';
 import Card from '../components/Card.astro';
 import EventCard from '../components/EventCard.astro';
 import { t, type Lang } from '../i18n/utils';
+import { getEvents, getNews, getClubInfo } from '../lib/content';
 
 const lang: Lang = 'de';
 
-// Load news
-const newsDir = path.resolve('src/content/news');
-const newsSlugs = fs.readdirSync(newsDir).filter((f: string) => {
-  const stat = fs.statSync(path.join(newsDir, f));
-  return stat.isDirectory();
-});
-
-interface NewsItem { title: string; date: string; excerpt: string; }
-
-const news: NewsItem[] = newsSlugs
-  .map((slug: string) => {
-    const fp = path.join(newsDir, slug, 'index.yaml');
-    if (!fs.existsSync(fp)) return null;
-    return yaml.load(fs.readFileSync(fp, 'utf-8')) as NewsItem;
-  })
-  .filter((n): n is NewsItem => n !== null)
+const news = getNews()
   .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
   .slice(0, 3);
 
-// Load events from Keystatic content
-const eventsDir = path.resolve('src/content/events');
-const eventSlugs = fs.readdirSync(eventsDir).filter((f: string) => {
-  const stat = fs.statSync(path.join(eventsDir, f));
-  return stat.isDirectory();
-});
-
-interface EventData {
-  title: string;
-  date: string;
-  description: string;
-}
-
-const events: EventData[] = eventSlugs
-  .map((slug: string) => {
-    const filePath = path.join(eventsDir, slug, 'index.yaml');
-    if (!fs.existsSync(filePath)) return null;
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    return yaml.load(raw) as EventData;
-  })
-  .filter((e): e is EventData => e !== null)
+const events = getEvents()
   .filter((e) => new Date(e.date) >= new Date())
   .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
-// Load club info
-const clubInfoPath = path.resolve('src/content/club-info/index.yaml');
-const clubInfo = yaml.load(fs.readFileSync(clubInfoPath, 'utf-8')) as {
-  memberCount: number;
-  courtCount: number;
-  hallCount: number;
-  teamCount: number;
-};
+const clubInfo = getClubInfo();
 ---
 
 <BaseLayout title="TCK Bötzingen – Tennisclub Kaiserstuhl" description="Tennisclub Kaiserstuhl Bötzingen – der älteste Tennisclub am Kaiserstuhl seit 1964." fullScreen={true}>

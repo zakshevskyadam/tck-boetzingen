@@ -1,0 +1,148 @@
+import {
+  verifySessionToken,
+  getSessionFromRequest,
+  type Env,
+} from '../_shared';
+
+function renderHtml(opts: {
+  isAuthenticated: boolean;
+  error: string | null;
+  success: string | null;
+  today: string;
+}): string {
+  const { isAuthenticated, error, success, today } = opts;
+
+  const errorHtml =
+    error === 'invalid'
+      ? '<div class="alert alert-error">Falsches Passwort.</div>'
+      : error === 'unauthorized'
+        ? '<div class="alert alert-error">Bitte erst einloggen.</div>'
+        : error === 'missing_fields'
+          ? '<div class="alert alert-error">Bitte alle Felder ausfüllen.</div>'
+          : error
+            ? `<div class="alert alert-error">Fehler: ${decodeURIComponent(error)}</div>`
+            : '';
+
+  const successHtml =
+    success === 'event'
+      ? '<div class="alert alert-success">✓ Veranstaltung gespeichert! Die Seite wird in ~1 Minute aktualisiert.</div>'
+      : success === 'news'
+        ? '<div class="alert alert-success">✓ Neuigkeit gespeichert! Die Seite wird in ~1 Minute aktualisiert.</div>'
+        : '';
+
+  const body = isAuthenticated
+    ? `
+        <div class="nav-actions">
+          <a href="/">&larr; Zurück zur Website</a>
+          <form method="POST" action="/api/admin/logout" style="display:inline; background:none; border:none; padding:0; margin:0; float:right;">
+            <button type="submit" class="logout">Abmelden</button>
+          </form>
+        </div>
+
+        <h2>Inhalte verwalten</h2>
+        <p class="subtitle">Fügen Sie Neuigkeiten oder Veranstaltungen hinzu. Änderungen erscheinen in ~1 Minute auf der Website.</p>
+
+        <form method="POST" action="/api/admin/content">
+          <input type="hidden" name="type" value="news" />
+          <h3>📰 Neue Neuigkeit</h3>
+          <label for="news-title">Titel</label>
+          <input type="text" id="news-title" name="title" required />
+          <label for="news-date">Datum</label>
+          <input type="date" id="news-date" name="date" value="${today}" required />
+          <label for="news-desc">Kurzbeschreibung</label>
+          <textarea id="news-desc" name="description" rows="4" required></textarea>
+          <button type="submit">Neuigkeit veröffentlichen</button>
+        </form>
+
+        <form method="POST" action="/api/admin/content">
+          <input type="hidden" name="type" value="event" />
+          <h3>📅 Neue Veranstaltung</h3>
+          <label for="event-title">Titel</label>
+          <input type="text" id="event-title" name="title" required />
+          <label for="event-date">Datum</label>
+          <input type="date" id="event-date" name="date" required />
+          <label for="event-desc">Beschreibung</label>
+          <textarea id="event-desc" name="description" rows="4" required></textarea>
+          <button type="submit">Veranstaltung veröffentlichen</button>
+        </form>
+      `
+    : `
+        <h2>Anmeldung</h2>
+        <p class="subtitle">Geben Sie das Admin-Passwort ein, um Inhalte zu bearbeiten.</p>
+        <form method="POST" action="/api/admin/login">
+          <label for="password">Passwort</label>
+          <input type="password" id="password" name="password" required autofocus />
+          <button type="submit">Einloggen</button>
+        </form>
+      `;
+
+  return `<!DOCTYPE html>
+<html lang="de" data-theme="dark">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Admin — TCK Bötzingen</title>
+<link rel="icon" type="image/png" href="/images/tck-icon.png" />
+<style>
+  :root { --bg:#0d1117; --bg-alt:#161b22; --accent:#c8ff00; --text:#f0f0f0; --text-muted:rgba(255,255,255,0.6); --border:rgba(200,255,0,0.1); --error:#ff6b6b; --success:#4ade80; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { background:var(--bg); color:var(--text); font-family:Inter,system-ui,sans-serif; min-height:100vh; padding:40px 20px; }
+  .container { max-width:640px; margin:0 auto; }
+  .brand { display:flex; align-items:center; gap:12px; margin-bottom:40px; padding-bottom:20px; border-bottom:1px solid var(--border); }
+  .brand img { width:40px; height:40px; border-radius:50%; }
+  .brand h1 { font-family:'Playfair Display',Georgia,serif; font-size:20px; font-weight:400; }
+  .brand .label { font-size:11px; color:var(--accent); letter-spacing:4px; text-transform:uppercase; margin-left:auto; }
+  h2 { font-family:'Playfair Display',Georgia,serif; font-size:32px; font-weight:300; margin-bottom:8px; }
+  .subtitle { color:var(--text-muted); font-size:14px; margin-bottom:32px; }
+  .alert { padding:12px 16px; border-radius:4px; margin-bottom:24px; font-size:14px; }
+  .alert-error { background:rgba(255,107,107,0.1); border:1px solid rgba(255,107,107,0.3); color:var(--error); }
+  .alert-success { background:rgba(74,222,128,0.1); border:1px solid rgba(74,222,128,0.3); color:var(--success); }
+  form { background:rgba(255,255,255,0.02); border:1px solid var(--border); padding:32px; border-radius:4px; margin-bottom:24px; }
+  form h3 { font-family:'Playfair Display',Georgia,serif; font-size:20px; font-weight:400; margin-bottom:20px; }
+  label { display:block; font-size:11px; letter-spacing:1px; text-transform:uppercase; color:var(--text-muted); margin-bottom:6px; margin-top:16px; }
+  label:first-of-type { margin-top:0; }
+  input,textarea,select { width:100%; background:rgba(255,255,255,0.05); border:1px solid var(--border); color:var(--text); padding:12px 14px; font-size:14px; font-family:inherit; border-radius:2px; }
+  input:focus,textarea:focus,select:focus { outline:none; border-color:rgba(200,255,0,0.4); }
+  textarea { resize:vertical; min-height:80px; }
+  button { background:transparent; border:1px solid rgba(200,255,0,0.4); color:var(--accent); padding:12px 28px; font-size:11px; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; font-family:inherit; margin-top:20px; }
+  button:hover { background:rgba(200,255,0,0.08); border-color:var(--accent); }
+  .logout { float:right; margin:0; padding:6px 14px; font-size:10px; }
+  .nav-actions { margin-bottom:24px; overflow:auto; }
+  .nav-actions a { color:var(--text-muted); font-size:12px; text-decoration:none; transition:color 0.2s; }
+  .nav-actions a:hover { color:var(--accent); }
+  footer { margin-top:40px; padding-top:20px; border-top:1px solid var(--border); color:var(--text-muted); font-size:12px; text-align:center; }
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="brand">
+    <img src="/images/tck-icon.png" alt="TCK" />
+    <h1>TCK Bötzingen</h1>
+    <span class="label">Admin</span>
+  </div>
+  ${errorHtml}
+  ${successHtml}
+  ${body}
+  <footer>TCK Bötzingen e.V. · Admin-Bereich</footer>
+</div>
+</body>
+</html>`;
+}
+
+export const onRequestGet: PagesFunction<Env> = async ({ request, env }) => {
+  const token = getSessionFromRequest(request);
+  const isAuthenticated = await verifySessionToken(token, env);
+
+  const url = new URL(request.url);
+  const error = url.searchParams.get('error');
+  const success = url.searchParams.get('success');
+  const today = new Date().toISOString().split('T')[0];
+
+  const html = renderHtml({ isAuthenticated, error, success, today });
+  return new Response(html, {
+    headers: {
+      'Content-Type': 'text/html; charset=utf-8',
+      'Cache-Control': 'no-store',
+    },
+  });
+};

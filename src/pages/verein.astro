@@ -1,7 +1,4 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
-import yaml from 'js-yaml';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionReveal from '../components/SectionReveal.astro';
 import Collapsible from '../components/Collapsible';
@@ -9,71 +6,21 @@ import PriceTable from '../components/PriceTable.astro';
 import TeamTable from '../components/TeamTable.astro';
 import FaqAccordion from '../components/FaqAccordion';
 import { t, type Lang } from '../i18n/utils';
+import { getTeams, getFaq, getDownloads } from '../lib/content';
 
 const lang: Lang = 'de';
 
-// Load teams
-const teamsDir = path.resolve('src/content/teams');
-const teamSlugs = fs.readdirSync(teamsDir).filter((f: string) => {
-  const stat = fs.statSync(path.join(teamsDir, f));
-  return stat.isDirectory();
-});
-
-interface TeamData { name: string; league: string; season: string; trainingDay: string; }
-
-const allTeams: TeamData[] = teamSlugs
-  .map((slug: string) => {
-    const filePath = path.join(teamsDir, slug, 'index.yaml');
-    if (!fs.existsSync(filePath)) return null;
-    return yaml.load(fs.readFileSync(filePath, 'utf-8')) as TeamData;
-  })
-  .filter((t): t is TeamData => t !== null);
-
+const allTeams = getTeams();
 const summerTeams = allTeams.filter((t) => t.season === 'summer').sort((a, b) => a.name.localeCompare(b.name, 'de'));
 const winterTeams = allTeams.filter((t) => t.season === 'winter').sort((a, b) => a.name.localeCompare(b.name, 'de'));
 
-// Load FAQ
-const faqDir = path.resolve('src/content/faq');
-const faqSlugs = fs.readdirSync(faqDir).filter((f: string) => {
-  const stat = fs.statSync(path.join(faqDir, f));
-  return stat.isDirectory();
-});
-
-interface FaqData { question: string; answer: string; category: string; sortOrder: number; }
-
-const allFaq: FaqData[] = faqSlugs
-  .map((slug: string) => {
-    const filePath = path.join(faqDir, slug, 'index.yaml');
-    if (!fs.existsSync(filePath)) return null;
-    return yaml.load(fs.readFileSync(filePath, 'utf-8')) as FaqData;
-  })
-  .filter((f): f is FaqData => f !== null)
-  .sort((a, b) => a.sortOrder - b.sortOrder);
-
+const allFaq = getFaq();
 const faqCategories = [...new Set(allFaq.map(f => f.category))].map(cat => ({
   name: cat.charAt(0).toUpperCase() + cat.slice(1).replace(/ae/g, 'ä').replace(/ue/g, 'ü').replace(/oe/g, 'ö'),
   items: allFaq.filter(f => f.category === cat).map(f => ({ q: f.question, a: f.answer })),
 }));
 
-// Load downloads
-const dlDir = path.resolve('src/content/downloads');
-const dlSlugs = fs.readdirSync(dlDir).filter((f: string) => {
-  const stat = fs.statSync(path.join(dlDir, f));
-  return stat.isDirectory();
-});
-
-interface DlData { title: string; description: string; category: string; file: string; }
-
-const downloads: DlData[] = dlSlugs
-  .map((slug: string) => {
-    const filePath = path.join(dlDir, slug, 'index.yaml');
-    if (!fs.existsSync(filePath)) return null;
-    const data = yaml.load(fs.readFileSync(filePath, 'utf-8')) as Omit<DlData, 'file'>;
-    const pdfPath = `/downloads/${slug}.pdf`;
-    const pdfExists = fs.existsSync(path.resolve('public', `downloads/${slug}.pdf`));
-    return { ...data, file: pdfExists ? pdfPath : '' };
-  })
-  .filter((d): d is DlData => d !== null);
+const downloads = getDownloads();
 
 const fees = [
   { cat: 'Erwachsene Einzelperson', basis: '205 €', ausgleich: '120 €' },

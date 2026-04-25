@@ -1,7 +1,4 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
-import yaml from 'js-yaml';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionReveal from '../components/SectionReveal.astro';
 import ContactForm from '../components/ContactForm.astro';
@@ -10,26 +7,11 @@ import LeafletMap from '../components/LeafletMap.tsx';
 import BoardMemberCard from '../components/BoardMemberCard.astro';
 import Collapsible from '../components/Collapsible';
 import { t, type Lang } from '../i18n/utils';
+import { getBoardMembers } from '../lib/content';
 
 const lang: Lang = 'de';
 
-// Load board members
-const boardDir = path.resolve('src/content/board-members');
-const boardSlugs = fs.readdirSync(boardDir).filter((f: string) => {
-  const stat = fs.statSync(path.join(boardDir, f));
-  return stat.isDirectory();
-});
-
-interface BoardMember { name: string; role: string; email: string; responsibilities: string; sortOrder: number; }
-
-const boardMembers: BoardMember[] = boardSlugs
-  .map((slug: string) => {
-    const filePath = path.join(boardDir, slug, 'index.yaml');
-    if (!fs.existsSync(filePath)) return null;
-    return yaml.load(fs.readFileSync(filePath, 'utf-8')) as BoardMember;
-  })
-  .filter((m): m is BoardMember => m !== null)
-  .sort((a, b) => a.sortOrder - b.sortOrder);
+const boardMembers = getBoardMembers();
 ---
 
 <BaseLayout title="Kontakt – TCK Bötzingen" description="Kontakt, Anfahrt und Ansprechpartner des TCK Bötzingen e.V.">

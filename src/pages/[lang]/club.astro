@@ -1,12 +1,10 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
-import yaml from 'js-yaml';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SectionReveal from '../../components/SectionReveal.astro';
 import BoardMemberCard from '../../components/BoardMemberCard.astro';
 import TeamTable from '../../components/TeamTable.astro';
 import { t, type Lang } from '../../i18n/utils';
+import { getBoardMembers, getTeams } from '../../lib/content';
 
 export function getStaticPaths() {
   return ['en', 'fr', 'ru', 'uk', 'es'].map(lang => ({ params: { lang } }));
@@ -14,56 +12,12 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as Lang;
 
-// Load board members
-const boardDir = path.resolve('src/content/board-members');
-const boardSlugs = fs.readdirSync(boardDir).filter((f: string) => {
-  const stat = fs.statSync(path.join(boardDir, f));
-  return stat.isDirectory();
-});
-
-interface BoardMember {
-  name: string;
-  role: string;
-  email: string;
-  responsibilities: string;
-  sortOrder: number;
-}
-
-const boardMembers: BoardMember[] = boardSlugs
-  .map((slug: string) => {
-    const filePath = path.join(boardDir, slug, 'index.yaml');
-    if (!fs.existsSync(filePath)) return null;
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    return yaml.load(raw) as BoardMember;
-  })
-  .filter((m): m is BoardMember => m !== null)
-  .sort((a, b) => a.sortOrder - b.sortOrder);
+const boardMembers = getBoardMembers();
 
 const trainer = boardMembers.filter((m) => m.role === 'Clubtrainer');
 const board = boardMembers.filter((m) => m.role !== 'Clubtrainer');
 
-// Load teams
-const teamsDir = path.resolve('src/content/teams');
-const teamSlugs = fs.readdirSync(teamsDir).filter((f: string) => {
-  const stat = fs.statSync(path.join(teamsDir, f));
-  return stat.isDirectory();
-});
-
-interface TeamData {
-  name: string;
-  league: string;
-  season: string;
-  trainingDay: string;
-}
-
-const allTeams: TeamData[] = teamSlugs
-  .map((slug: string) => {
-    const filePath = path.join(teamsDir, slug, 'index.yaml');
-    if (!fs.existsSync(filePath)) return null;
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    return yaml.load(raw) as TeamData;
-  })
-  .filter((t): t is TeamData => t !== null);
+const allTeams = getTeams();
 
 const summerTeams = allTeams
   .filter((t) => t.season === 'summer')

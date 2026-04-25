@@ -1,35 +1,13 @@
 ---
-import fs from 'node:fs';
-import path from 'node:path';
-import yaml from 'js-yaml';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import SectionReveal from '../components/SectionReveal.astro';
 import EventCard from '../components/EventCard.astro';
 import { t, type Lang } from '../i18n/utils';
+import { getEvents } from '../lib/content';
 
 const lang: Lang = 'de';
 
-// Load events
-const eventsDir = path.resolve('src/content/events');
-const eventSlugs = fs.readdirSync(eventsDir).filter((f: string) => {
-  const stat = fs.statSync(path.join(eventsDir, f));
-  return stat.isDirectory();
-});
-
-interface EventData {
-  title: string;
-  date: string;
-  description: string;
-}
-
-const allEvents: EventData[] = eventSlugs
-  .map((slug: string) => {
-    const filePath = path.join(eventsDir, slug, 'index.yaml');
-    if (!fs.existsSync(filePath)) return null;
-    const raw = fs.readFileSync(filePath, 'utf-8');
-    return yaml.load(raw) as EventData;
-  })
-  .filter((e): e is EventData => e !== null)
+const allEvents = getEvents()
   .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
 const upcoming = allEvents.filter((e) => new Date(e.date) >= new Date());
