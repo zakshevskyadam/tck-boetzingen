@@ -4,87 +4,127 @@ import SectionReveal from '../../components/SectionReveal.astro';
 import ContactForm from '../../components/ContactForm.astro';
 import ZutrittsForm from '../../components/ZutrittsForm.astro';
 import LeafletMap from '../../components/LeafletMap.tsx';
+import BoardMemberCard from '../../components/BoardMemberCard.astro';
+import Collapsible from '../../components/Collapsible';
 import { t, type Lang } from '../../i18n/utils';
+import { getBoardMembers } from '../../lib/content';
 
 export function getStaticPaths() {
   return ['en', 'fr', 'ru', 'uk', 'es'].map(lang => ({ params: { lang } }));
 }
 
 const lang = Astro.params.lang as Lang;
+
+const boardMembers = getBoardMembers();
+const sent = Astro.url.searchParams.get('sent') === '1';
 ---
 
-<BaseLayout title={t('contact.info.title', lang) + ' – TCK Bötzingen'} description={t('contact.info.title', lang)} lang={lang}>
+<BaseLayout title={t('contact.form.title', lang) + ' – TCK Bötzingen'} description={t('contact.form.text', lang)} lang={lang}>
 
-  <!-- Contact Form -->
+  <!-- Contact info + Form -->
   <section class="py-28 px-6 md:px-12">
     <SectionReveal>
       <div class="max-w-4xl mx-auto">
-        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('contact.info.label', lang)}</div>
-        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">Schreiben Sie uns</h2>
-        <p class="text-sm leading-relaxed text-white/70 max-w-2xl mb-10">
-          Haben Sie Fragen oder Anregungen? Füllen Sie das Formular aus und wir melden uns zeitnah bei Ihnen.
-        </p>
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('contact.form.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('contact.form.title', lang)}</h2>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+          <div class="bg-white/[0.02] border border-mc-border p-5">
+            <div class="text-xs tracking-[2px] text-white/55 uppercase mb-2">{t('contact.info.phone', lang)}</div>
+            <a href="tel:+4976632440" class="text-mc-text hover:text-mc-accent transition-colors text-sm">07663-2440</a>
+          </div>
+          <div class="bg-white/[0.02] border border-mc-border p-5">
+            <div class="text-xs tracking-[2px] text-white/55 uppercase mb-2">{t('contact.info.email', lang)}</div>
+            <a href="mailto:info@tck-boetzingen.de" class="text-mc-text hover:text-mc-accent transition-colors text-sm break-all">info@tck-boetzingen.de</a>
+          </div>
+          <div class="bg-white/[0.02] border border-mc-border p-5">
+            <div class="text-xs tracking-[2px] text-white/55 uppercase mb-2">{t('contact.info.address', lang)}</div>
+            <p class="text-sm text-mc-text">Waldstraße 5, 79268 Bötzingen</p>
+          </div>
+        </div>
+
+        {sent && (
+          <div class="mb-8 p-5 border border-mc-accent/40 bg-mc-accent/10 text-mc-text">
+            <p class="font-medium text-mc-text mb-1">✓ {t('contact.success.title', lang)}</p>
+            <p class="text-sm text-white/75">{t('contact.success.text', lang)}</p>
+          </div>
+        )}
+
         <ContactForm />
       </div>
     </SectionReveal>
   </section>
 
-  <!-- Directions -->
+  <!-- Mitglied werden CTA -->
+  <section class="py-20 px-6 md:px-12">
+    <SectionReveal>
+      <div class="max-w-4xl mx-auto">
+        <div class="bg-mc-accent/[0.04] border border-mc-accent/20 p-8 md:p-10">
+          <div class="flex flex-col md:flex-row items-start md:items-center gap-6 justify-between">
+            <div class="flex-1">
+              <div class="text-[11px] tracking-[4px] text-mc-accent uppercase mb-2">{t('contact.cta.label', lang)}</div>
+              <h3 class="font-heading text-2xl font-light text-mc-text mb-3">{t('contact.cta.title', lang)}</h3>
+              <p class="text-sm text-white/70 max-w-xl">{t('contact.cta.text', lang)}</p>
+            </div>
+            <a
+              href="/downloads/aufnahmeantrag.pdf"
+              download="Aufnahmeantrag_TCK_Boetzingen.pdf"
+              target="_blank"
+              rel="noopener"
+              class="cta-sweep inline-flex items-center gap-2 px-8 py-4 border border-mc-accent text-mc-accent text-xs tracking-[2px] uppercase transition-colors whitespace-nowrap shrink-0"
+            >
+              <svg class="w-4 h-4" viewBox="0 0 20 20" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M10 3v11m0 0l-4-4m4 4l4-4M4 17h12" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              {t('contact.cta.button', lang)}
+            </a>
+          </div>
+        </div>
+      </div>
+    </SectionReveal>
+  </section>
+
+  <!-- Anfahrt -->
   <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
     <SectionReveal>
       <div class="max-w-4xl mx-auto">
         <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('contact.map.label', lang)}</div>
         <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('contact.map.title', lang)}</h2>
-        <div class="mb-8 border border-mc-border overflow-hidden rounded">
+        <div class="border border-mc-border overflow-hidden rounded">
           <LeafletMap client:only="react" />
         </div>
-        <div class="text-sm leading-relaxed text-white/70">
-          <p class="text-mc-text font-medium mb-1">Tennisclub Kaiserstuhl Bötzingen e.V.</p>
-          <p>Waldstraße 5</p>
-          <p>79268 Bötzingen</p>
-        </div>
       </div>
     </SectionReveal>
   </section>
 
-  <!-- Access -->
+  <!-- Collapsible forms -->
   <section class="py-28 px-6 md:px-12">
     <SectionReveal>
-      <div class="max-w-4xl mx-auto">
-        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">Zutritt</div>
-        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">Zutrittsberechtigung</h2>
-        <p class="text-sm leading-relaxed text-white/70 max-w-2xl mb-10">
-          Sie benötigen einen Schlüsselanhänger oder eine Schlüsselkarte für den Zugang zur Tennisanlage? Beantragen Sie hier Ihre Zutrittsberechtigung.
-        </p>
-        <ZutrittsForm />
+      <div class="max-w-4xl mx-auto space-y-4">
+        <Collapsible client:load title={t('contact.access.title', lang)}>
+          <p class="text-sm text-white/70 mb-6">{t('contact.access.intro', lang)}</p>
+          <ZutrittsForm />
+        </Collapsible>
+
       </div>
     </SectionReveal>
   </section>
 
-  <!-- Contact Details -->
+  <!-- Vorstand -->
   <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
     <SectionReveal>
-      <div class="max-w-4xl mx-auto">
-        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('contact.info.label', lang)}</div>
-        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('contact.info.title', lang)}</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-6">
-          <div class="bg-white/[0.02] border border-mc-border p-6">
-            <div class="text-xs tracking-[2px] text-white/55 uppercase mb-3">Telefon</div>
-            <a href="tel:+4976632440" class="text-mc-text hover:text-mc-accent/80 transition-colors text-sm">
-              07663-2440
-            </a>
-          </div>
-          <div class="bg-white/[0.02] border border-mc-border p-6">
-            <div class="text-xs tracking-[2px] text-white/55 uppercase mb-3">E-Mail</div>
-            <a href="mailto:info@tck-boetzingen.de" class="text-mc-text hover:text-mc-accent/80 transition-colors text-sm break-all">
-              info@tck-boetzingen.de
-            </a>
-          </div>
-          <div class="bg-white/[0.02] border border-mc-border p-6">
-            <div class="text-xs tracking-[2px] text-white/55 uppercase mb-3">Adresse</div>
-            <p class="text-sm text-mc-text">Waldstraße 5</p>
-            <p class="text-sm text-white/70">79268 Bötzingen</p>
-          </div>
+      <div class="max-w-5xl mx-auto">
+        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('contact.vorstand.label', lang)}</div>
+        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('contact.vorstand.title', lang)}</h2>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {boardMembers.map((member) => (
+            <BoardMemberCard
+              name={member.name}
+              role={member.role}
+              email={member.email}
+              responsibilities={member.responsibilities}
+            />
+          ))}
         </div>
       </div>
     </SectionReveal>

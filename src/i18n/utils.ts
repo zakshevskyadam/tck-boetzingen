@@ -23,7 +23,12 @@ export function getLang(url: URL | string): Lang {
 
 export function getLocalizedPath(dePath: string, lang: Lang): string {
   const route = ROUTE_MAP[dePath];
-  if (!route) return lang === DEFAULT_LANG ? dePath : `/${lang}${dePath}`;
+  // Unknown route → redirect to /verein (= /club) in target language
+  if (!route) {
+    const fallback = ROUTE_MAP['/verein'];
+    const slug = fallback[lang];
+    return lang === DEFAULT_LANG ? slug : `/${lang}${slug}`;
+  }
   const slug = route[lang];
   return lang === DEFAULT_LANG ? slug : `/${lang}${slug}`;
 }

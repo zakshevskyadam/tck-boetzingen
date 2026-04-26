@@ -1,10 +1,12 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import SectionReveal from '../../components/SectionReveal.astro';
-import BoardMemberCard from '../../components/BoardMemberCard.astro';
+import Collapsible from '../../components/Collapsible';
+import PriceTable from '../../components/PriceTable.astro';
 import TeamTable from '../../components/TeamTable.astro';
-import { t, type Lang } from '../../i18n/utils';
-import { getBoardMembers, getTeams } from '../../lib/content';
+import FaqAccordion from '../../components/FaqAccordion';
+import { t, getLocalizedPath, type Lang } from '../../i18n/utils';
+import { getTeams, getFaq, getDownloads } from '../../lib/content';
 
 export function getStaticPaths() {
   return ['en', 'fr', 'ru', 'uk', 'es'].map(lang => ({ params: { lang } }));
@@ -12,120 +14,239 @@ export function getStaticPaths() {
 
 const lang = Astro.params.lang as Lang;
 
-const boardMembers = getBoardMembers();
-
-const trainer = boardMembers.filter((m) => m.role === 'Clubtrainer');
-const board = boardMembers.filter((m) => m.role !== 'Clubtrainer');
-
 const allTeams = getTeams();
+const summerTeams = allTeams.filter((t) => t.season === 'summer').sort((a, b) => a.name.localeCompare(b.name));
+const winterTeams = allTeams.filter((t) => t.season === 'winter').sort((a, b) => a.name.localeCompare(b.name));
 
-const summerTeams = allTeams
-  .filter((t) => t.season === 'summer')
-  .sort((a, b) => a.name.localeCompare(b.name, 'de'));
+const allFaq = getFaq();
+const faqCategories = [...new Set(allFaq.map(f => f.category))].map(cat => ({
+  name: cat.charAt(0).toUpperCase() + cat.slice(1).replace(/ae/g, 'ä').replace(/ue/g, 'ü').replace(/oe/g, 'ö'),
+  items: allFaq.filter(f => f.category === cat).map(f => ({ q: f.question, a: f.answer })),
+}));
 
-const winterTeams = allTeams
-  .filter((t) => t.season === 'winter')
-  .sort((a, b) => a.name.localeCompare(b.name, 'de'));
+const downloads = getDownloads();
+
+const fees = [
+  { catKey: 'verein.mitgliedschaft.cat.erwachsene', basis: '205 €', ausgleich: '120 €' },
+  { catKey: 'verein.mitgliedschaft.cat.ehegatte', basis: '110 €', ausgleich: '120 €' },
+  { catKey: 'verein.mitgliedschaft.cat.familie', basis: '350 €', ausgleich: '240 €' },
+  { catKey: 'verein.mitgliedschaft.cat.kinder', basis: '55 €', ausgleich: '—' },
+  { catKey: 'verein.mitgliedschaft.cat.jugendliche', basis: '68 €', ausgleich: '—' },
+  { catKey: 'verein.mitgliedschaft.cat.studenten', basis: '115 €', ausgleich: '120 €' },
+  { catKey: 'verein.mitgliedschaft.cat.passiv', basis: '50 €', ausgleich: '—' },
+];
+
+const trainingSchedule = [
+  { dayKey: 'verein.mannschaften.day.montag', team: 'Herren 50, Herren 60' },
+  { dayKey: 'verein.mannschaften.day.dienstag', team: 'Damen 30' },
+  { dayKey: 'verein.mannschaften.day.mittwoch', team: 'Damen 60, Damen 40, Damen 50' },
+  { dayKey: 'verein.mannschaften.day.donnerstag', team: 'Herren 30' },
+];
+
+const kontaktHref = getLocalizedPath('/kontakt', lang);
 ---
 
-<BaseLayout title={t('verein.history.title', lang) + ' – TCK Bötzingen'} description={t('about.text', lang)} lang={lang}>
+<BaseLayout title={t('verein.intro.title', lang) + ' – TCK Bötzingen'} description={t('verein.intro.text', lang)} lang={lang}>
 
-  <!-- History -->
-  <section class="py-28 px-6 md:px-12">
+  <!-- Hero Banner -->
+  <section class="relative py-28 px-6 md:px-12 overflow-hidden">
+    <div class="absolute inset-0 opacity-20">
+      <img src="/images/tck-luftbild.jpg" alt="" class="w-full h-full object-cover" />
+    </div>
+    <div class="absolute inset-0 bg-gradient-to-b from-mc-bg via-mc-bg/90 to-mc-bg"></div>
     <SectionReveal>
-      <div class="max-w-4xl mx-auto">
-        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('verein.history.label', lang)}</div>
-        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">{t('verein.history.title', lang)}</h2>
-        <div class="space-y-4 text-sm leading-relaxed text-white/70 max-w-2xl">
-          <p>
-            Der Tennisclub Kaiserstuhl Bötzingen e.V. wurde 1975 gegründet und ist damit einer der traditionsreichsten Tennisvereine am Kaiserstuhl. Was als kleine Gruppe tennisbegeisterter Bötzinger begann, hat sich über die Jahrzehnte zu einem der aktivsten Sportvereine der Gemeinde entwickelt.
-          </p>
-          <p>
-            In den Anfangsjahren wurden zunächst zwei Außenplätze errichtet. Mit wachsender Mitgliederzahl folgte der stetige Ausbau der Anlage auf heute sechs Außenplätze und eine moderne Zwei-Feld-Tennishalle. Der Bau des Clubhauses schuf einen Mittelpunkt für das Vereinsleben, der weit über den Sport hinausgeht.
-          </p>
-          <p>
-            Mit mittlerweile rund 185 Mitgliedern und 17 aktiven Mannschaften in allen Altersklassen – von der U9-Jugend bis zu den Senioren 60 – ist der TCK Bötzingen heute ein fester Bestandteil der regionalen Tennislandschaft. Besonderer Stolz des Vereins ist die starke Jugendarbeit in Zusammenarbeit mit der Tennisschule Tennis-Welt Süd.
-          </p>
-        </div>
+      <div class="max-w-4xl mx-auto relative">
+        <div class="text-[11px] tracking-[4px] text-mc-accent uppercase mb-3">{t('verein.intro.label', lang)}</div>
+        <h1 class="font-heading text-5xl font-light text-mc-text tracking-wide mb-6">{t('verein.intro.title', lang)}</h1>
+        <p class="text-base leading-relaxed text-white/70 max-w-2xl">
+          {t('verein.intro.text', lang)}
+        </p>
       </div>
     </SectionReveal>
   </section>
 
-  <!-- Board -->
-  <section class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
+  <!-- Collapsible sections -->
+  <section class="pb-28 px-6 md:px-12">
     <SectionReveal>
-      <div class="max-w-5xl mx-auto">
-        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('verein.board.label', lang)}</div>
-        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('verein.board.title', lang)}</h2>
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {board.map((member) => (
-            <BoardMemberCard
-              name={member.name}
-              role={member.role}
-              email={member.email}
-              responsibilities={member.responsibilities}
-            />
-          ))}
-        </div>
-      </div>
-    </SectionReveal>
-  </section>
+      <div class="max-w-4xl mx-auto space-y-4">
 
-  <!-- Coaches -->
-  <section id="trainer" class="py-28 px-6 md:px-12">
-    <SectionReveal>
-      <div class="max-w-4xl mx-auto">
-        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('verein.trainers.label', lang)}</div>
-        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-6">{t('verein.trainers.title', lang)}</h2>
-        <div class="space-y-6">
-          <div class="card-hover relative overflow-hidden bg-white/[0.02] border border-mc-border p-8 transition-all duration-400">
-            <span class="text-[11px] tracking-[2px] uppercase text-mc-accent/70 block mb-2">Tennis-Welt Süd</span>
-            <h3 class="font-heading text-xl font-normal text-mc-text mb-3">Luiz Weller</h3>
-            <p class="text-sm leading-relaxed text-white/70 mb-4">
-              Das Training beim TCK Bötzingen wird von der Tennisschule Tennis-Welt Süd unter der Leitung von Luiz Weller durchgeführt. Luiz bietet professionelles Training für alle Altersklassen und Spielstärken – vom Anfänger bis zum Leistungsspieler.
-            </p>
-            <p class="text-sm leading-relaxed text-white/70 mb-4">
-              Trainingsangebote: Jugendtraining, Erwachsenentraining, Mannschaftstraining, Einzelstunden und Camps.
-            </p>
-            <a
-              href="https://www.tennis-welt.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              class="text-sm text-mc-accent/60 hover:text-mc-accent transition-colors underline-offset-2 hover:underline"
-            >
-              www.tennis-welt.com &rarr;
+        <!-- Tennishalle -->
+        <Collapsible client:load title={t('verein.collapsible.tennishalle', lang)} defaultOpen={true}>
+          <div class="space-y-4 text-sm leading-relaxed text-white/70">
+            <div class="rounded overflow-hidden mb-4 border border-mc-border">
+              <img src="/images/gallery/tennishalle.jpg" alt="Tennishalle" class="w-full h-auto" loading="lazy" />
+            </div>
+            <p>{t('verein.tennishalle.text', lang)}</p>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 my-6">
+              <div class="bg-white/[0.02] border border-mc-border p-4 text-center">
+                <div class="font-heading text-2xl text-mc-accent/70">2</div>
+                <div class="text-xs text-white/55 uppercase tracking-wider">{t('verein.tennishalle.stat.plaetze', lang)}</div>
+              </div>
+              <div class="bg-white/[0.02] border border-mc-border p-4 text-center">
+                <div class="font-heading text-2xl text-mc-accent/70">{t('verein.tennishalle.stat.saison.value', lang)}</div>
+                <div class="text-xs text-white/55 uppercase tracking-wider">{t('verein.tennishalle.stat.saison', lang)}</div>
+              </div>
+              <div class="bg-white/[0.02] border border-mc-border p-4 text-center">
+                <div class="font-heading text-2xl text-mc-accent/70">50%</div>
+                <div class="text-xs text-white/55 uppercase tracking-wider">{t('verein.tennishalle.stat.jugendrabatt', lang)}</div>
+              </div>
+              <div class="bg-white/[0.02] border border-mc-border p-4 text-center">
+                <div class="font-heading text-2xl text-mc-accent/70">50%</div>
+                <div class="text-xs text-white/55 uppercase tracking-wider">{t('verein.tennishalle.stat.sommerrabatt', lang)}</div>
+              </div>
+            </div>
+            <PriceTable lang={lang} />
+            <div class="pt-4 flex flex-wrap items-center gap-4">
+              <a href="https://buchung.tck-boetzingen.de" target="_blank" rel="noopener" class="cta-sweep inline-block px-7 py-3 border border-mc-accent/30 text-mc-accent text-xs tracking-[2px] uppercase">
+                {t('verein.tennishalle.cta', lang)}
+              </a>
+              <span class="text-sm text-white/55">{t('verein.tennishalle.questions', lang)} <a href="mailto:buchung@tck-boetzingen.de" class="text-mc-accent hover:underline">buchung@tck-boetzingen.de</a></span>
+            </div>
+          </div>
+        </Collapsible>
+
+        <!-- Mitgliedschaft -->
+        <Collapsible client:load title={t('verein.collapsible.mitgliedschaft', lang)}>
+          <div class="space-y-6 text-sm leading-relaxed text-white/70">
+            <div class="rounded overflow-hidden border border-mc-border">
+              <img src="/images/gallery/clubhaus-blumen.jpg" alt="Clubhaus" class="w-full h-auto" loading="lazy" />
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div class="bg-mc-accent/[0.04] border border-mc-accent/20 p-5">
+                <h4 class="text-mc-text font-medium text-lg mb-3">{t('verein.mitgliedschaft.aktiv.title', lang)}</h4>
+                <ul class="space-y-2 text-sm text-white/70">
+                  <li>✓ {t('verein.mitgliedschaft.aktiv.li1', lang)}</li>
+                  <li>✓ {t('verein.mitgliedschaft.aktiv.li2', lang)}</li>
+                  <li>✓ {t('verein.mitgliedschaft.aktiv.li3', lang)}</li>
+                  <li>✓ {t('verein.mitgliedschaft.aktiv.li4', lang)}</li>
+                  <li class="text-white/50 text-xs">{t('verein.mitgliedschaft.aktiv.li5', lang)}</li>
+                </ul>
+              </div>
+              <div class="bg-white/[0.02] border border-mc-border p-5">
+                <h4 class="text-mc-text font-medium text-lg mb-3">{t('verein.mitgliedschaft.passiv.title', lang)}</h4>
+                <ul class="space-y-2 text-sm text-white/70">
+                  <li>✓ {t('verein.mitgliedschaft.passiv.li1', lang)}</li>
+                  <li>✓ {t('verein.mitgliedschaft.passiv.li2', lang)}</li>
+                  <li>✓ {t('verein.mitgliedschaft.passiv.li3', lang)}</li>
+                  <li>✓ {t('verein.mitgliedschaft.passiv.li4', lang)}</li>
+                  <li class="text-white/50 text-xs">{t('verein.mitgliedschaft.passiv.li5', lang)}</li>
+                </ul>
+              </div>
+            </div>
+            <h4 class="font-heading text-xl text-mc-text">{t('verein.mitgliedschaft.fees.title', lang)}</h4>
+            <div class="overflow-x-auto">
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="border-b border-mc-border">
+                    <th class="py-3 px-4 text-left text-[11px] tracking-wider uppercase text-mc-accent/60 font-medium">{t('verein.mitgliedschaft.fees.col1', lang)}</th>
+                    <th class="py-3 px-4 text-left text-[11px] tracking-wider uppercase text-mc-accent/60 font-medium">{t('verein.mitgliedschaft.fees.col2', lang)}</th>
+                    <th class="py-3 px-4 text-left text-[11px] tracking-wider uppercase text-mc-accent/60 font-medium">{t('verein.mitgliedschaft.fees.col3', lang)}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {fees.map(row => (
+                    <tr class="border-b border-mc-border/50 hover:bg-white/[0.02] transition-colors">
+                      <td class="py-3 px-4 text-mc-text">{t(row.catKey, lang)}</td>
+                      <td class="py-3 px-4 text-white/70">{row.basis}</td>
+                      <td class="py-3 px-4 text-white/70">{row.ausgleich}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p class="text-xs text-white/50">{t('verein.mitgliedschaft.note', lang)}</p>
+            <a href={kontaktHref} class="cta-sweep inline-block px-7 py-3 border border-mc-accent/30 text-mc-accent text-xs tracking-[2px] uppercase">
+              {t('verein.mitgliedschaft.cta', lang)}
             </a>
           </div>
-          {trainer.map((member) => (
-            <BoardMemberCard
-              name={member.name}
-              role={member.role}
-              email={member.email}
-              responsibilities={member.responsibilities}
-            />
-          ))}
-        </div>
-      </div>
-    </SectionReveal>
-  </section>
+        </Collapsible>
 
-  <!-- Teams -->
-  <section id="mannschaften" class="py-28 px-6 md:px-12 bg-gradient-to-b from-mc-bg via-mc-bg-alt to-mc-bg">
-    <SectionReveal>
-      <div class="max-w-5xl mx-auto">
-        <div class="text-[11px] tracking-[4px] text-mc-accent/50 uppercase mb-3">{t('verein.teams.label', lang)}</div>
-        <h2 class="font-heading text-4xl font-light text-mc-text tracking-wide mb-10">{t('verein.teams.title', lang)}</h2>
+        <!-- Mannschaften -->
+        <Collapsible client:load title={t('verein.collapsible.mannschaften', lang)}>
+          <div class="space-y-6">
+            <div class="rounded overflow-hidden mb-2 border border-mc-border">
+              <img src="/images/gallery/anlage-panorama.jpg" alt="TCK Bötzingen" class="w-full h-auto" loading="lazy" />
+            </div>
+            <p class="text-sm leading-relaxed text-white/70">{t('verein.mannschaften.text', lang)}</p>
+            <h4 class="font-heading text-lg text-mc-text">{t('verein.mannschaften.training.title', lang)}</h4>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
+              {trainingSchedule.map(slot => (
+                <div class="bg-white/[0.02] border border-mc-border p-3">
+                  <div class="text-mc-accent text-sm font-medium mb-1">{t(slot.dayKey, lang)}</div>
+                  <div class="text-xs text-white/70">{slot.team}</div>
+                </div>
+              ))}
+            </div>
+            <div class="space-y-8">
+              <div>
+                <h4 class="font-heading text-lg text-mc-text mb-3">{t('verein.mannschaften.sommer', lang)} <span class="text-sm text-white/50 font-body">— {summerTeams.length} {t('verein.mannschaften.count', lang)}</span></h4>
+                <TeamTable teams={summerTeams} season="Sommer 2026" />
+              </div>
+              <div>
+                <h4 class="font-heading text-lg text-mc-text mb-3">{t('verein.mannschaften.winter', lang)} <span class="text-sm text-white/50 font-body">— {winterTeams.length} {t('verein.mannschaften.count', lang)}</span></h4>
+                <TeamTable teams={winterTeams} season="Winter 2025/26" />
+              </div>
+            </div>
+          </div>
+        </Collapsible>
 
-        <div class="space-y-16">
-          <div>
-            <h3 class="font-heading text-2xl font-light text-mc-text mb-6">Sommersaison</h3>
-            <TeamTable teams={summerTeams} season="Sommer 2026" />
+        <!-- Training -->
+        <Collapsible client:load title={t('verein.collapsible.training', lang)}>
+          <div class="text-sm leading-relaxed text-white/70">
+            <div class="bg-white/[0.02] border border-mc-border p-6 md:p-8">
+              <div class="flex flex-col sm:flex-row items-start gap-6">
+                <div class="flex-shrink-0 w-full sm:w-48">
+                  <img src="/images/luiz-weller.png" alt="Luiz Weller" class="w-full rounded border border-mc-border" loading="lazy" />
+                </div>
+                <div class="flex-1">
+                  <img src="/images/tenniswelt-logo.png" alt="Tennis-Welt Süd" class="h-10 mb-3 opacity-90" loading="lazy" />
+                  <span class="text-[11px] tracking-[2px] uppercase text-mc-accent block mb-1">{t('verein.training.label', lang)}</span>
+                  <h4 class="font-heading text-2xl text-mc-text mb-3">Luiz Weller</h4>
+                  <p class="mb-3">{t('verein.training.intro', lang)}</p>
+                  <p class="mb-4">
+                    <strong class="text-mc-text">{t('verein.training.angebote.label', lang)}</strong> {t('verein.training.angebote', lang)}
+                  </p>
+                  <a href="https://www.tennis-welt.com" target="_blank" rel="noopener" class="text-sm text-mc-accent hover:underline underline-offset-2">
+                    www.tennis-welt.com &rarr;
+                  </a>
+                </div>
+              </div>
+            </div>
           </div>
-          <div>
-            <h3 class="font-heading text-2xl font-light text-mc-text mb-6">Wintersaison</h3>
-            <TeamTable teams={winterTeams} season="Winter 2025/26" />
+        </Collapsible>
+
+        <!-- FAQ -->
+        <Collapsible client:load title={t('verein.collapsible.faq', lang)}>
+          <FaqAccordion client:load categories={faqCategories} />
+        </Collapsible>
+
+        <!-- Downloads -->
+        <Collapsible client:load title={t('verein.collapsible.downloads', lang)}>
+          <p class="text-sm text-white/70 mb-4">{t('verein.downloads.intro', lang)}</p>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+            {downloads.map((dl) => (
+              <a
+                href={dl.file || `mailto:info@tck-boetzingen.de?subject=Dokument%20anfordern%3A%20${encodeURIComponent(dl.title)}`}
+                download={dl.file ? `${dl.title}.pdf` : undefined}
+                target={dl.file ? '_blank' : undefined}
+                rel={dl.file ? 'noopener' : undefined}
+                class="block bg-white/[0.02] border border-mc-border p-4 hover:border-mc-accent/30 hover:bg-white/[0.04] transition-colors group"
+              >
+                <div class="flex items-start gap-3">
+                  <span class="text-mc-accent/60 text-lg flex-shrink-0 group-hover:text-mc-accent transition-colors">📄</span>
+                  <div class="flex-1 min-w-0">
+                    <div class="text-mc-text text-sm font-medium group-hover:text-mc-accent transition-colors">{dl.title}</div>
+                    {dl.description && <p class="text-xs text-white/55 mt-1">{dl.description}</p>}
+                    <div class="text-[11px] text-mc-accent/60 mt-2 tracking-wide uppercase">
+                      {dl.file ? t('verein.downloads.action', lang) : t('verein.downloads.action.request', lang)}
+                    </div>
+                  </div>
+                </div>
+              </a>
+            ))}
           </div>
-        </div>
+        </Collapsible>
+
       </div>
     </SectionReveal>
   </section>

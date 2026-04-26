@@ -13,8 +13,8 @@ export const DEFAULT_LANG: Lang = 'de';
 export const ROUTE_MAP: Record<string, Record<Lang, string>> = {
   '/': { de: '/', en: '/', fr: '/', ru: '/', uk: '/', es: '/' },
   '/verein': { de: '/verein', en: '/club', fr: '/club', ru: '/club', uk: '/club', es: '/club' },
-  '/tennishalle': { de: '/tennishalle', en: '/tennis-hall', fr: '/salle-de-tennis', ru: '/tennisnyj-zal', uk: '/tenisnyj-zal', es: '/sala-de-tenis' },
-  '/mitgliedschaft': { de: '/mitgliedschaft', en: '/membership', fr: '/adhesion', ru: '/chlenstvo', uk: '/chlenstvo', es: '/membresia' },
-  '/termine': { de: '/termine', en: '/events', fr: '/evenements', ru: '/sobytija', uk: '/podiji', es: '/eventos' },
-  '/kontakt': { de: '/kontakt', en: '/contact', fr: '/contact', ru: '/kontakt', uk: '/kontakt', es: '/contacto' },
+  '/termine': { de: '/termine', en: '/events', fr: '/events', ru: '/events', uk: '/events', es: '/events' },
+  '/kontakt': { de: '/kontakt', en: '/contact', fr: '/contact', ru: '/contact', uk: '/contact', es: '/contact' },
+  '/datenschutz': { de: '/datenschutz', en: '/privacy', fr: '/privacy', ru: '/privacy', uk: '/privacy', es: '/privacy' },
+  '/impressum': { de: '/impressum', en: '/imprint', fr: '/imprint', ru: '/imprint', uk: '/imprint', es: '/imprint' },
 };
