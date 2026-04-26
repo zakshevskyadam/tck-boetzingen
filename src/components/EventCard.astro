@@ -35,9 +35,13 @@ const preview = isLong
         </span>
       </summary>
       <p class="text-sm leading-relaxed text-white/70 mt-3 whitespace-pre-wrap">{description}</p>
-      <span class="event-toggle-close text-[11px] tracking-[2px] uppercase text-mc-accent/70 hover:text-mc-accent mt-3 inline-block transition-colors">
+      <button
+        type="button"
+        class="event-toggle-close text-[11px] tracking-[2px] uppercase text-mc-accent/70 hover:text-mc-accent mt-3 inline-block transition-colors bg-transparent border-0 p-0 cursor-pointer"
+        onclick="this.closest('details').open = false"
+      >
         Weniger anzeigen &uarr;
-      </span>
+      </button>
     </details>
   ) : (
     <p class="text-sm leading-relaxed text-white/70 whitespace-pre-wrap">{description}</p>
